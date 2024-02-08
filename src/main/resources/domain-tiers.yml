@@ -1,0 +1,19 @@
+my_tier_1:
+  name: "Encampment"
+  tier_level: 1
+  required_population: 0
+  allowed_actions: []
+
+my_tier_2:
+  name: "Settlement"
+  tier_level: 2
+  population_required: 0
+  allowed_actions:
+    - "create_currency"
+
+my_tier_3:
+  name: "Village"
+  tier_level: 3
+  population_required: 30
+  allowed_actions:
+    - "create_titles"
