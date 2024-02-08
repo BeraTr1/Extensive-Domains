@@ -1,0 +1,12 @@
+name: ExtensiveDomains
+version: '${project.version}'
+main: org.saulo.extensivedomains.ExtensiveDomains
+api-version: '1.20'
+
+# Commands #
+
+commands:
+  extensivedomains:
+    aliases: [ed]
+
+# Permissions #
