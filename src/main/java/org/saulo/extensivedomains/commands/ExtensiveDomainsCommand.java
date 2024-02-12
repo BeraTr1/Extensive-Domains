@@ -172,7 +172,8 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         Chunk chunk = Utils.getChunkAtPlayerLocation(player);
 
         try {
-            DomainManager.claimChunk(domain, chunk);
+            DomainManager domainManager = ExtensiveDomains.instance.domainManager;
+            domainManager.claimChunk(domain, chunk);
         } catch (Exception e) {
             player.sendMessage(e.getMessage());
             return;
@@ -188,7 +189,8 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         Chunk chunk = Utils.getChunkAtPlayerLocation(player);
 
         try {
-            DomainManager.unclaimChunk(domain, chunk);
+            DomainManager domainManager = ExtensiveDomains.instance.domainManager;
+            domainManager.unclaimChunk(domain, chunk);
         } catch (Exception e) {
             player.sendMessage(e.getMessage());
             return;
@@ -241,7 +243,8 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         Chunk chunk = player.getLocation().getChunk();
         Claim claim = Mapper.getClaimFromChunk(chunk);
         ClaimProtection claimProtection = ClaimProtection.getProtectionFromName(protectionName);
-        DomainManager.addClaimProtection(claim, claimProtection);
+        DomainManager domainManager = ExtensiveDomains.instance.domainManager;
+        domainManager.addClaimProtection(claim, claimProtection);
 
         // todo remove below
         if (claim == null) {
@@ -261,13 +264,14 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         Chunk chunk = player.getLocation().getChunk();
         Claim claim = Mapper.getClaimFromChunk(chunk);
         ClaimPermission.ClaimAction claimAction = ClaimPermission.ClaimAction.getClaimActionByName(actionName);
+        DomainManager domainManager = ExtensiveDomains.instance.domainManager;
 
         switch (conditionName.toLowerCase()) {
             case "player-with-title":
-                DomainManager.addClaimPermission(claim, claimAction, new HasTitleCondition(conditionArg));
+                domainManager.addClaimPermission(claim, claimAction, new HasTitleCondition(conditionArg));
                 break;
             case "player-with-name":
-                DomainManager.addClaimPermission(claim, claimAction, new HasNameCondition(conditionArg));
+                domainManager.addClaimPermission(claim, claimAction, new HasNameCondition(conditionArg));
                 break;
             case "player-belongs-to":
                 break;
@@ -279,7 +283,8 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
     }
 
     private void createShop(Player player, String shopName) {
-        EconomyManager.createShop(player, shopName);
+        EconomyManager economyManager = ExtensiveDomains.instance.economyManager;
+        economyManager.createShop(player, shopName);
         player.sendMessage("Created new shop '" + shopName + "'!");
     }
 
@@ -342,7 +347,8 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
             return;
         }
 
-        EconomyManager.createCurrency(domain, currencyName);
+        EconomyManager economyManager = ExtensiveDomains.instance.economyManager;
+        economyManager.createCurrency(domain, currencyName);
 
         player.sendMessage("Created currency with name '" + currencyName + "'");
     }
@@ -546,7 +552,8 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         }
 
         double amount = Double.parseDouble(amountString);
-        EconomyManager.addBalance(currencyAccount, amount);
+        EconomyManager economyManager = ExtensiveDomains.instance.economyManager;
+        economyManager.addBalance(currencyAccount, amount);
         player.sendMessage("Added " + amount + " to your account!");
     }
 

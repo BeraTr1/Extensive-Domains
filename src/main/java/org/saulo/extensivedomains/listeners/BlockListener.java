@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
+import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.managers.DomainManager;
 import org.saulo.extensivedomains.objects.*;
 
@@ -62,7 +63,8 @@ public class BlockListener implements Listener {
 
         if (playerOwnsClaim) return;
 
-        boolean playerCanDestroyInClaim = DomainManager.playerHasPermission(player, claim, ClaimPermission.ClaimAction.DESTROY);
+        DomainManager domainManager = ExtensiveDomains.instance.domainManager;
+        boolean playerCanDestroyInClaim = domainManager.playerHasPermission(player, claim, ClaimPermission.ClaimAction.DESTROY);
 
         if (playerCanDestroyInClaim) return;
 
