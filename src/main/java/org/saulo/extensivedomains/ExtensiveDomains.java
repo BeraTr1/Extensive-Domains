@@ -7,6 +7,7 @@ import org.saulo.extensivedomains.listeners.BlockListener;
 import org.saulo.extensivedomains.managers.ConfigManager;
 import org.saulo.extensivedomains.managers.DomainManager;
 import org.saulo.extensivedomains.managers.DomainTierManager;
+import org.saulo.extensivedomains.managers.EconomyManager;
 
 public final class ExtensiveDomains extends JavaPlugin {
     public static ExtensiveDomains instance;
@@ -14,6 +15,7 @@ public final class ExtensiveDomains extends JavaPlugin {
     public ConfigManager configManager;
     public DomainTierManager domainTierManager;
     public DomainManager domainManager;
+    public EconomyManager economyManager;
 
     @Override
     public void onEnable() {

@@ -1,8 +1,8 @@
 package org.saulo.extensivedomains.managers;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 import org.saulo.extensivedomains.ExtensiveDomains;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class ConfigManager {
         }
     }
 
-    public YamlConfiguration loadConfig(File file) {
+    public YamlConfiguration loadConfig(@NotNull File file) {
         boolean fileExists = file.exists();
 
         if (!fileExists) {
@@ -82,7 +82,7 @@ public class ConfigManager {
         return loadConfig(file);
     }
 
-    public void saveConfig(YamlConfiguration config, File file) {
+    public void saveConfig(@NotNull YamlConfiguration config, File file) {
         try {
             config.save(file);
         } catch (IOException e) {
@@ -90,36 +90,19 @@ public class ConfigManager {
         }
     }
 
-//    public void createConfigFile(File file, YamlConfiguration config) {
-//        try {
-//            config.save(file);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    public void createConfigFile(String path, YamlConfiguration config) {
-//        File file = getFileFromPath(path);
-//        createConfigFile(file, config);
-//    }
-
-//    public File getFileFromPath(String path) {
-//        return new File(pluginFolder, path);
-//    }
-
-    public Set<String> getConfigKeys(YamlConfiguration config) {
+    public Set<String> getConfigKeys(@NotNull YamlConfiguration config) {
         return config.getKeys(false);
     }
 
-    public String getConfigString(YamlConfiguration config, String path) {
+    public String getConfigString(@NotNull YamlConfiguration config, @NotNull String path) {
         return config.getString(path.toLowerCase());
     }
 
-    public int getConfigInteger(YamlConfiguration config, String path) {
+    public int getConfigInteger(@NotNull YamlConfiguration config, @NotNull String path) {
         return config.getInt(path.toLowerCase());
     }
 
-    public List<String> getListString(YamlConfiguration config, String path) {
+    public List<String> getListString(@NotNull YamlConfiguration config, @NotNull String path) {
         return config.getStringList(path.toLowerCase());
     }
 }

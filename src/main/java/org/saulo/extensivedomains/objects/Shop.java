@@ -1,6 +1,7 @@
 package org.saulo.extensivedomains.objects;
 
 import org.bukkit.inventory.ItemStack;
+import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.managers.EconomyManager;
 
 import java.util.HashMap;
@@ -144,6 +145,7 @@ public class Shop {
         }
 
         ItemTransaction shopSendingTransaction = new ItemTransaction(this.stockInventory, traderInventory, shopSendingItemsTransaction);
+        EconomyManager economyManager = ExtensiveDomains.instance.economyManager;
 
         if (this.currencyAccount == null) {
             if (totalIncomeForShop > 0) {
@@ -163,8 +165,8 @@ public class Shop {
                     System.out.println("\tCurrency: " + buyerCurrencyAccount.getCurrency().getName());
                 }
 
-                double priceInBuyerCurrency = EconomyManager.convertCurrencyValue(this.currencyAccount.getCurrency(), buyerCurrencyAccount.getCurrency(), totalIncomeForShop);
-                boolean buyerHasEnoughMoney = EconomyManager.currencyAccountCanAffordValue(buyerCurrencyAccount, Math.abs(priceInBuyerCurrency));
+                double priceInBuyerCurrency = economyManager.convertCurrencyValue(this.currencyAccount.getCurrency(), buyerCurrencyAccount.getCurrency(), totalIncomeForShop);
+                boolean buyerHasEnoughMoney = economyManager.currencyAccountCanAffordValue(buyerCurrencyAccount, Math.abs(priceInBuyerCurrency));
 
                 System.out.println("Price in shop's currency: " + Math.abs(totalIncomeForShop));
                 System.out.println("Price in buyer's currency: " + Math.abs(priceInBuyerCurrency));
@@ -178,9 +180,9 @@ public class Shop {
                 }
 
                 CurrencyTransaction currencyTransaction = new CurrencyTransaction(buyerCurrencyAccount, Math.abs(priceInBuyerCurrency), this.currencyAccount);
-                EconomyManager.processCurrencyTransaction(currencyTransaction);
+                economyManager.processCurrencyTransaction(currencyTransaction);
             } else {
-                boolean shopHasEnoughMoney = EconomyManager.currencyAccountCanAffordValue(this.currencyAccount, Math.abs(totalIncomeForShop));
+                boolean shopHasEnoughMoney = economyManager.currencyAccountCanAffordValue(this.currencyAccount, Math.abs(totalIncomeForShop));
 
                 if (!shopHasEnoughMoney) {
                     //todo debug
@@ -190,13 +192,13 @@ public class Shop {
                 }
 
                 CurrencyTransaction currencyTransaction = new CurrencyTransaction(this.currencyAccount, Math.abs(totalIncomeForShop), buyerCurrencyAccount);
-                EconomyManager.processCurrencyTransaction(currencyTransaction);
+                economyManager.processCurrencyTransaction(currencyTransaction);
             }
 
         }
 
-        EconomyManager.processItemTransaction(shopReceivingTransaction);
-        EconomyManager.processItemTransaction(shopSendingTransaction);
+        economyManager.processItemTransaction(shopReceivingTransaction);
+        economyManager.processItemTransaction(shopSendingTransaction);
 
         return true;
     }

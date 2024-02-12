@@ -8,31 +8,31 @@ import java.text.DecimalFormat;
 import java.util.Map;
 
 public class EconomyManager {
-    public static void createCurrency(Domain domain, String currencyName) {
+    public void createCurrency(Domain domain, String currencyName) {
         Currency currency = new Currency(domain, currencyName);
         domain.setPrimaryCurrency(currency);
         Mapper.addCurrencyWithName(currencyName, currency);
     }
 
-    public static void addBalance(CurrencyAccount currencyAccount, double amount) {
+    public void addBalance(CurrencyAccount currencyAccount, double amount) {
         double totalBalance = currencyAccount.getBalance() + amount;
         currencyAccount.setBalance(totalBalance);
     }
 
-    public static void removeBalance(CurrencyAccount currencyAccount, double amount) {
+    public void removeBalance(CurrencyAccount currencyAccount, double amount) {
         double totalBalance = currencyAccount.getBalance() - amount;
         currencyAccount.setBalance(totalBalance);
     }
 
-    public static void addCurrencyAccount() {
+    public void addCurrencyAccount() {
 
     }
 
-    public static void removeCurrencyAccount() {
+    public void removeCurrencyAccount() {
 
     }
 
-    public static void processCurrencyTransaction(CurrencyTransaction currencyTransaction) {
+    public void processCurrencyTransaction(CurrencyTransaction currencyTransaction) {
         System.out.println("Processing transaction...");
         double amountInSenderCurrency = currencyTransaction.getAmountInSenderCurrency();
 
@@ -62,7 +62,7 @@ public class EconomyManager {
         senderCurrencyAccount.removeBalance(senderAmount);
     }
 
-    public static void createShop(Player player, String shopName) {
+    public void createShop(Player player, String shopName) {
         Citizen citizen = Mapper.getCitizenFromUUID(player.getUniqueId());
         Shop shop = new Shop(shopName, citizen);
         citizen.setShop(shop);
@@ -70,7 +70,7 @@ public class EconomyManager {
         Mapper.addShopWithName(shopName, shop);
     }
 
-    public static void processItemTransaction(ItemTransaction itemTransaction) {
+    public void processItemTransaction(ItemTransaction itemTransaction) {
         VirtualInventory senderInventory = itemTransaction.getSenderInventory();
         VirtualInventory receiverInventory = itemTransaction.getReceiverInventory();
 
@@ -82,12 +82,12 @@ public class EconomyManager {
         }
     }
 
-    public static boolean currencyAccountCanAffordValue(CurrencyAccount currencyAccount, double value) {
+    public boolean currencyAccountCanAffordValue(CurrencyAccount currencyAccount, double value) {
         double balance = currencyAccount.getBalance();
         return balance >= value;
     }
 
-    public static double getExchangeRateOfCurrencies(Currency currencyA, Currency currencyB) {
+    public double getExchangeRateOfCurrencies(Currency currencyA, Currency currencyB) {
         double currencyAPurchasingPower = currencyA.getPurchasingPower();
         double currencyBPurchasingPower = currencyB.getPurchasingPower();
 
@@ -111,14 +111,14 @@ public class EconomyManager {
         return exchangeRateFormatted;
     }
 
-    public static double convertCurrencyValue(Currency currencyA, Currency currencyB, double valueInCurrencyA) {
-        double exchangeRate = getExchangeRateOfCurrencies(currencyA, currencyB);
+    public double convertCurrencyValue(Currency currencyA, Currency currencyB, double valueInCurrencyA) {
+        double exchangeRate = this.getExchangeRateOfCurrencies(currencyA, currencyB);
         double valueInCurrencyB = valueInCurrencyA * exchangeRate;
 
         return valueInCurrencyB;
     }
 
-    public static void addShopStock(Shop shop, ItemStack item, int amount) {
+    public void addShopStock(Shop shop, ItemStack item, int amount) {
         shop.addStock(item, amount);
     }
 }

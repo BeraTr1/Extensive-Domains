@@ -35,7 +35,7 @@ public class DomainManager {
         domain.setDomainTier(domainTier);
     }
 
-    public static void claimChunk(Domain domain, Chunk chunk) throws Exception {
+    public void claimChunk(Domain domain, Chunk chunk) throws Exception {
         if (chunkIsClaimed(chunk)) {
             throw new Exception("This chunk is already claimed");
         }
@@ -46,7 +46,7 @@ public class DomainManager {
         //todo create map for UUID -> Claim ?
     }
 
-    public static void unclaimChunk(Domain domain, Chunk chunk) throws Exception {
+    public void unclaimChunk(Domain domain, Chunk chunk) throws Exception {
         if (!chunkIsClaimed(chunk)) {
             throw new Exception("This chunk is not claimed");
         }
@@ -62,14 +62,14 @@ public class DomainManager {
         //todo remove claim from unclaimed chunk in Mapper
     }
 
-    public static boolean chunkIsClaimed(Chunk chunk) {
+    public boolean chunkIsClaimed(Chunk chunk) {
         Claim claim = Mapper.getClaimFromChunk(chunk);
         boolean chunkIsClaimed = claim != null;
 
         return chunkIsClaimed;
     }
 
-    public static void addClaimProtection(Claim claim, ClaimProtection claimProtection) {
+    public void addClaimProtection(Claim claim, ClaimProtection claimProtection) {
         if (claim == null) {
             return;
         }
@@ -77,7 +77,7 @@ public class DomainManager {
         claim.addProtection(claimProtection);
     }
 
-    public static void addClaimPermission(Claim claim, ClaimPermission.ClaimAction claimAction, Condition condition) {
+    public void addClaimPermission(Claim claim, ClaimPermission.ClaimAction claimAction, Condition condition) {
         claim.getClaimPermission().addPermissionCondition(claimAction, condition);
     }
 
@@ -85,7 +85,7 @@ public class DomainManager {
 
     }
 
-    public static boolean playerHasPermission(Player player, Claim claim, ClaimPermission.ClaimAction claimAction) {
+    public boolean playerHasPermission(Player player, Claim claim, ClaimPermission.ClaimAction claimAction) {
         return claim.getClaimPermission().playerHasPermission(player, claimAction);
     }
 
