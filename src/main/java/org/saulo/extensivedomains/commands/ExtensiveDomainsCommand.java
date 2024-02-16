@@ -134,6 +134,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
 
         int population = Integer.parseInt(populationString);
         domain.setPopulation(population);
+        player.sendMessage("Set population to " + populationString + "!");
     }
 
     private void upgradeDomain(Player player) {
@@ -225,7 +226,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         player.sendMessage("Domain Tier Level: " + (domain.getDomainTier() == null ? "none" : domain.getDomainTier().getLevel()));
         player.sendMessage("");
         player.sendMessage("-- Citizen --");
-        player.sendMessage("Player: " + citizen.getPlayer().getName());
+//        player.sendMessage("Player: " + citizen.getPlayer().getName());
         player.sendMessage("Title: " + (citizen.getTitle() == null ? "none" : citizen.getTitle().getName()));
     }
 
