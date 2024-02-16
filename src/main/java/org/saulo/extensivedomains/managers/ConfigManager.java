@@ -43,7 +43,6 @@ public class ConfigManager {
 
                 if (inputStream == null) {
 //                    throw new Exception("Resource file " + fileName + " not found!");
-                    System.out.println("Resource file " + fileName + " not found!");
                     return;
                 }
 
@@ -58,7 +57,6 @@ public class ConfigManager {
                 outputStream.close();
                 YamlConfiguration config = this.loadConfig(file);
                 this.saveConfig(config, file);
-                System.out.println("Created default file '" + fileName + "'");
             } catch (IOException e) {
                 e.printStackTrace();
             }
