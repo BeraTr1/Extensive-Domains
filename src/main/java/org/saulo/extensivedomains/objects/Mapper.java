@@ -16,6 +16,7 @@ public class Mapper {
     private static Map<String, Shop> nameShopMap = new HashMap<>();
 
     private static Map<String, Currency> nameCurrencyMap = new HashMap<>();
+    private static Map<UUID, Currency> uuidCurrencyMap = new HashMap<>();
 
     public static Citizen getCitizenFromUUID(UUID uuid) {
         return uuidCitizenMap.getOrDefault(uuid, null);
@@ -25,12 +26,20 @@ public class Mapper {
         uuidCitizenMap.put(uuid, citizen);
     }
 
+    public static Map<UUID, Citizen> getCitizenUUIDMap() {
+        return uuidCitizenMap;
+    }
+
     public static Claim getClaimFromChunk(Chunk chunk) {
         return chunkClaimMap.getOrDefault(chunk, null);
     }
 
     public static void addClaimWithChunk(Claim claim, Chunk chunk) {
         chunkClaimMap.put(chunk, claim);
+    }
+
+    public static Map<UUID, Domain> getUUIDDomainMap() {
+        return uuidDomainMap;
     }
 
     public static Domain getDomainFromUUID(UUID uuid) {
@@ -49,19 +58,29 @@ public class Mapper {
         return citizenShopMap.getOrDefault(citizen, null);
     }
 
+    public static Shop getShopFromUUID(UUID uuid) {
+        return uuidShopMap.getOrDefault(uuid, null);
+    }
+
+    public static void addShopWithUUID(UUID uuid, Shop shop) {
+        uuidShopMap.put(uuid, shop);
+    }
+
+    @Deprecated
     public static Currency getCurrencyFromName(String name) {
         return nameCurrencyMap.getOrDefault(name, null);
     }
 
+    @Deprecated
     public static void addCurrencyWithName(String name, Currency currency) {
         nameCurrencyMap.put(name, currency);
     }
 
-    public static void addShopWithName(String name, Shop shop) {
-        nameShopMap.put(name, shop);
+    public static Currency getCurrencyFromUUID(UUID uuid) {
+        return uuidCurrencyMap.getOrDefault(uuid, null);
     }
 
-    public static Shop getShopFromName(String name) {
-        return nameShopMap.getOrDefault(name, null);
+    public static void addCurrencyWithUUID(UUID uuid, Currency currency) {
+        uuidCurrencyMap.put(uuid, currency);
     }
 }
