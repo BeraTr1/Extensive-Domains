@@ -21,6 +21,10 @@ public class Citizen {
         Mapper.addCitizenWithUUID(this, uuid); //todo move this to event listener (onPlayerJoinEvent)
     }
 
+    public Citizen(UUID uuid) {
+        this.uuid = uuid;
+    }
+
     public void setDomain(Domain domain) {
         this.domain = domain;
     }
@@ -33,6 +37,7 @@ public class Citizen {
         return this.title;
     }
 
+    @Deprecated
     public Player getPlayer() {
         return this.player;
     }
@@ -59,5 +64,9 @@ public class Citizen {
 
     public VirtualInventory getInventory() {
         return this.inventory;
+    }
+
+    public UUID getUUID() {
+        return this.uuid;
     }
 }
