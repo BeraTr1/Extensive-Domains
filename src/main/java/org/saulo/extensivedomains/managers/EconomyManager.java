@@ -2,15 +2,22 @@ package org.saulo.extensivedomains.managers;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.objects.*;
 
 import java.text.DecimalFormat;
 import java.util.Map;
 
 public class EconomyManager {
+    ExtensiveDomains plugin;
+
+    public EconomyManager(ExtensiveDomains plugin) {
+        this.plugin = plugin;
+    }
+
     public void createCurrency(Domain domain, String currencyName) {
         Currency currency = new Currency(domain, currencyName);
-        domain.setPrimaryCurrency(currency);
+        domain.setPrimaryCurrencyAccount(currency);
         Mapper.addCurrencyWithName(currencyName, currency);
     }
 
@@ -67,7 +74,6 @@ public class EconomyManager {
         Shop shop = new Shop(shopName, citizen);
         citizen.setShop(shop);
         Mapper.addShopWithCitizen(shop, citizen);
-        Mapper.addShopWithName(shopName, shop);
     }
 
     public void processItemTransaction(ItemTransaction itemTransaction) {
