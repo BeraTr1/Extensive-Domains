@@ -1,11 +1,13 @@
 package org.saulo.extensivedomains.objects;
 
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.managers.EconomyManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class Shop {
     // todo modify if needed
@@ -22,11 +24,16 @@ public class Shop {
     private Map<ItemStack, Double> buyingItems = new HashMap<>();
     private VirtualInventory stockInventory = new VirtualInventory();
     private String name;
+    private UUID uuid;
 
     public Shop(String name, Citizen citizen) {
         Domain domain = citizen.getDomain();
         this.domain = domain;
         this.name = name.isEmpty() ? "" : name;
+    }
+
+    public UUID getUUID() {
+        return this.uuid;
     }
 
     public String getName() {
