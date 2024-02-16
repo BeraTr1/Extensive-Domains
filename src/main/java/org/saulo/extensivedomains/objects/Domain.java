@@ -2,6 +2,8 @@ package org.saulo.extensivedomains.objects;
 
 import org.bukkit.Chunk;
 import org.jetbrains.annotations.NotNull;
+import org.saulo.extensivedomains.ExtensiveDomains;
+import org.saulo.extensivedomains.managers.DomainTierManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +21,7 @@ public class Domain {
 
     private double influence = 0.0;
     private int population = 0;
-    private CurrencyAccount primaryCurrency;
+    private CurrencyAccount primaryCurrencyAccount;
     private List<CurrencyAccount> currencyAccounts; //todo remove, only 1 account per object will be used
     private DomainTier domainTier;
     private MarketCenter marketCenter = new MarketCenter();
@@ -27,6 +29,15 @@ public class Domain {
     public Domain(Citizen headOfState) {
         this.headOfState = headOfState;
         this.uuid = UUID.randomUUID(); //todo Domain(UUID uuid, etc.), get uuid when trying to load data (and fails) or when creating new domain,
+    }
+
+    public Domain(UUID uuid) {
+        this.uuid = uuid;
+
+        DomainTierManager domainTierManager = ExtensiveDomains.instance.domainTierManager;
+        final int startingDomainTierLevel = 1;
+        DomainTier domainTier = domainTierManager.getDomainTierFromLevel(startingDomainTierLevel);
+        this.setDomainTier(domainTier);
     }
 
     public void addClaim(Claim claim) {
@@ -72,6 +83,26 @@ public class Domain {
         return this.claims;
     }
 
+    public String getClaimsAsString() {
+        StringBuilder claimsString = new StringBuilder();
+
+        for (Claim claim : this.claims) {
+            String chunkString = claim.getChunk().getX() + "," + claim.getChunk().getZ() + "," + claim.getChunk().getWorld().getName();
+
+            if (claimsString.length() > 0) {
+                claimsString.append("|").append(chunkString);
+            } else {
+                claimsString.append(chunkString);
+            }
+        }
+
+        return claimsString.toString();
+    }
+
+    public void setClaims(List<Claim> claims) {
+        this.claims = claims;
+    }
+
     public UUID getUUID() {
         return this.uuid;
     }
@@ -88,12 +119,16 @@ public class Domain {
         return this.name;
     }
 
-    public CurrencyAccount getPrimaryCurrency() {
-        return this.primaryCurrency;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setPrimaryCurrency(Currency currency) {
-        this.primaryCurrency = new CurrencyAccount(currency);
+    public CurrencyAccount getPrimaryCurrencyAccount() {
+        return this.primaryCurrencyAccount;
+    }
+
+    public void setPrimaryCurrencyAccount(Currency currency) {
+        this.primaryCurrencyAccount = new CurrencyAccount(currency);
     }
 
     @NotNull
@@ -107,5 +142,23 @@ public class Domain {
 
     public void setPopulation(int population) {
         this.population = population;
+    }
+
+    public String getCitizensAsString() {
+        StringBuilder citizensString = new StringBuilder();
+
+        for (Citizen citizen : this.citizens) {
+            if (citizensString.length() > 0) {
+                citizensString.append("|").append(citizen.getUUID().toString());
+            } else {
+                citizensString.append(citizen.getUUID().toString());
+            }
+        }
+
+        return citizensString.toString();
+    }
+
+    public void addCitizen(Citizen citizen) {
+        this.citizens.add(citizen);
     }
 }
