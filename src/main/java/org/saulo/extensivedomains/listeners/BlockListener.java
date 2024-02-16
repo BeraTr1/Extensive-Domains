@@ -57,6 +57,11 @@ public class BlockListener implements Listener {
         Player player = event.getPlayer();
         Chunk chunk = player.getLocation().getChunk();
         Claim claim = Mapper.getClaimFromChunk(chunk);
+
+        if (claim == null) {
+            return;
+        }
+
         Citizen claimOwner = claim.getOwner();
 
         boolean playerOwnsClaim = claimOwner != null && claimOwner.getPlayer().equals(player);
