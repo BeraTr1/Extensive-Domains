@@ -24,6 +24,7 @@ public class DomainManager {
         Claim claim = new Claim(domain, chunk);
         domain.addClaim(claim);
         citizen.setDomain(domain);
+        domain.addCitizen(citizen);
 
         UUID domainUUID = domain.getUUID();
         Mapper.addDomainWithUUID(domain, domainUUID);
