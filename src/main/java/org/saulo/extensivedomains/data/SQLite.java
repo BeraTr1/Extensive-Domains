@@ -2,6 +2,7 @@ package org.saulo.extensivedomains.data;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.objects.*;
 
@@ -55,12 +56,7 @@ public class SQLite implements Data {
     public void loadAll() {
         Connection connection = connect();
 
-//        preloadAll(connection);
-        System.out.println("Preloading data...");
-        preloadCitizens(connection);
-        preloadDomains(connection);
-        // todo claims (must be after domains) ?
-        System.out.println("Successfully preloaded all data!");
+        preloadAll(connection);
 
         System.out.println("Loading data...");
         loadCitizens(connection);
@@ -75,10 +71,14 @@ public class SQLite implements Data {
     }
 
     private void preloadAll(Connection connection) {
+        System.out.println("Preloading data...");
         preloadCitizens(connection);
         preloadDomains(connection);
+        // todo claims (must be after domains) ?
+        System.out.println("Successfully preloaded all data!");
     }
 
+    // todo rename to getDataFromTable
     private ResultSet queryTable(Connection connection, String tableName) {
         try {
             StringBuilder stringBuilder = new StringBuilder();
@@ -315,13 +315,14 @@ public class SQLite implements Data {
                     int coordX = Integer.parseInt(chunkCoordinates[0]);
                     int coordZ = Integer.parseInt(chunkCoordinates[1]);
                     String worldName = chunkCoordinates[2];
-                    boolean worldExists = Bukkit.getWorld(worldName) == null;
+                    World world = Bukkit.getWorld(worldName);
+                    boolean worldExists = world != null;
 
                     if (!worldExists) {
                         continue;
                     }
 
-                    Chunk chunk = Bukkit.getWorld(worldName).getChunkAt(coordX, coordZ);
+                    Chunk chunk = world.getChunkAt(coordX, coordZ);
                     Claim claim = new Claim(domain, chunk);
 
                     domain.addClaim(claim);

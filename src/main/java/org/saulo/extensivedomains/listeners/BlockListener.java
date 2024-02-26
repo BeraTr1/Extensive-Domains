@@ -55,7 +55,7 @@ public class BlockListener implements Listener {
     @EventHandler
     public void onBlockBreakEvent(BlockBreakEvent event) {
         Player player = event.getPlayer();
-        Chunk chunk = player.getLocation().getChunk();
+        Chunk chunk = event.getBlock().getChunk();
         Claim claim = Mapper.getClaimFromChunk(chunk);
 
         if (claim == null) {
@@ -65,6 +65,8 @@ public class BlockListener implements Listener {
         Citizen claimOwner = claim.getOwner();
 
         boolean playerOwnsClaim = claimOwner != null && claimOwner.getPlayer().equals(player);
+
+        // todo check if player can destroy blocks through manager (manager.playerCanDestroyBlocks(claim))
 
         if (playerOwnsClaim) return;
 
