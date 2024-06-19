@@ -2,7 +2,6 @@ package org.saulo.extensivedomains.objects;
 
 import org.bukkit.entity.Player;
 
-import java.util.List;
 import java.util.UUID;
 
 public class Citizen {
@@ -14,7 +13,6 @@ public class Citizen {
     public Citizen(Player player) {
         this.player = player;
         this.uuid = player.getUniqueId();
-        Mapper.addCitizenWithUUID(this, uuid); //todo move this to event listener (onPlayerJoinEvent)
     }
 
     public Citizen(UUID uuid) {
@@ -44,5 +42,16 @@ public class Citizen {
 
     public UUID getUUID() {
         return this.uuid;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Citizen)) {
+            return false;
+        }
+
+        UUID objUUID = ((Citizen) obj).uuid;
+
+        return this.uuid == objUUID;
     }
 }

@@ -8,10 +8,11 @@ import org.saulo.extensivedomains.data.Data;
 import org.saulo.extensivedomains.data.SQLite;
 import org.saulo.extensivedomains.listeners.BlockListener;
 import org.saulo.extensivedomains.listeners.ChangeDayListener;
+import org.saulo.extensivedomains.listeners.PlayerListener;
 import org.saulo.extensivedomains.managers.*;
 import org.saulo.extensivedomains.tasks.DetectDayChangeTask;
 
-public final class ExtensiveDomains extends JavaPlugin {
+public class ExtensiveDomains extends JavaPlugin {
     public static ExtensiveDomains instance;
 
     public ConfigManager configManager;
@@ -25,9 +26,9 @@ public final class ExtensiveDomains extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        registerEventListeners();
-        registerCommands();
         loadManagers();
+        registerCommands();
+        registerEventListeners();
         loadData();
 
         Runnable runnable = new DetectDayChangeTask();
@@ -44,10 +45,11 @@ public final class ExtensiveDomains extends JavaPlugin {
 
         pluginManager.registerEvents(new BlockListener(), this);
         pluginManager.registerEvents(new ChangeDayListener(), this);
+        pluginManager.registerEvents(new PlayerListener(citizenManager), this);
     }
 
     private void registerCommands() {
-        this.getCommand("extensivedomains").setExecutor(new ExtensiveDomainsCommand());
+        this.getCommand("extensivedomains").setExecutor(new ExtensiveDomainsCommand(citizenManager));
     }
 
     private void loadManagers() {
@@ -57,16 +59,16 @@ public final class ExtensiveDomains extends JavaPlugin {
         this.domainManager = new DomainManager(this);
         // todo remove below, pass it into "dataManager.loadData()" instead
         String databaseLocation = "database.db";
-        Data data = new SQLite(databaseLocation);
+        Data data = new SQLite(databaseLocation, citizenManager);
         this.dataManager = new DataManager(this, data);
         this.dailyTaskManager = new DailyTaskManager(this);
     }
 
     public void loadData() {
-        this.dataManager.loadData();
+//        this.dataManager.loadData();
     }
 
     public void saveData() {
-        this.dataManager.saveData();
+//        this.dataManager.saveData();
     }
 }
