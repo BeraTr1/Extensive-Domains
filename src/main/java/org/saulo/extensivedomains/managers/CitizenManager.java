@@ -2,10 +2,7 @@ package org.saulo.extensivedomains.managers;
 
 import org.saulo.extensivedomains.objects.Citizen;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class CitizenManager {
     private Map<UUID, Citizen> citizenInstances = new HashMap<>();
@@ -25,7 +22,7 @@ public class CitizenManager {
     }
 
     public List<Citizen> getCitizenInstances() {
-        return (List<Citizen>) this.citizenInstances.values();
+        return new ArrayList<>(this.citizenInstances.values());
     }
 
     public Citizen getRegisteredCitizen(UUID uuid) {
