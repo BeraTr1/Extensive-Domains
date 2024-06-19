@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.saulo.extensivedomains.ExtensiveDomains;
+import org.saulo.extensivedomains.managers.CitizenManager;
 import org.saulo.extensivedomains.objects.*;
 
 import java.io.File;
@@ -14,9 +15,11 @@ import java.util.UUID;
 
 public class SQLite implements Data {
     private final File databaseFile;
+    private CitizenManager citizenManager;
 
-    public SQLite(String location) {
+    public SQLite(String location, CitizenManager citizenManager) {
         this.databaseFile = new File(ExtensiveDomains.instance.getDataFolder() + File.separator + location);
+        this.citizenManager = citizenManager;
     }
 
     public Connection connect() {
@@ -114,7 +117,7 @@ public class SQLite implements Data {
     }
 
     private void saveCitizens(Connection connection) {
-        List<Citizen> citizens = new ArrayList<>(Mapper.getCitizenUUIDMap().values());
+        List<Citizen> citizens = citizenManager.getCitizenInstances();
         System.out.println("\tTrying to save (" + citizens.size() + ") citizens...");
 
         for (Citizen citizen : citizens) {
@@ -142,7 +145,7 @@ public class SQLite implements Data {
                 String citizenUUIDString = resultSet.getString("citizen_id");
                 UUID citizenUUID = UUID.fromString(citizenUUIDString);
                 Citizen citizen = new Citizen(citizenUUID);
-                Mapper.addCitizenWithUUID(citizen, citizenUUID);
+                citizenManager.registerCitizen(citizen);
                 System.out.printf("\t\tPreloaded citizen with uuid (%s)\n", citizenUUIDString);
             }
         } catch (Exception e) {
@@ -164,7 +167,7 @@ public class SQLite implements Data {
             while (resultSet.next()) {
                 String citizenUUIDString = resultSet.getString("citizen_id");
                 UUID citizenUUID = UUID.fromString(citizenUUIDString);
-                Citizen citizen = Mapper.getCitizenFromUUID(citizenUUID);
+                Citizen citizen = citizenManager.getRegisteredCitizen(citizenUUID);
                 System.out.printf("\t\tLoading citizen with uuid (%s)...\n", citizenUUIDString);
                 loadCitizen(citizen, resultSet);
             }
@@ -308,7 +311,7 @@ public class SQLite implements Data {
 
                 for (String citizenUUIDString : citizensUUIDStrings) {
                     UUID uuid = UUID.fromString(citizenUUIDString);
-                    Citizen citizen = Mapper.getCitizenFromUUID(uuid);
+                    Citizen citizen = citizenManager.getRegisteredCitizen(uuid);
                     domain.addCitizen(citizen);
                 }
             }

@@ -19,6 +19,7 @@ public final class ExtensiveDomains extends JavaPlugin {
     public DomainManager domainManager;
     public DataManager dataManager;
     public DailyTaskManager dailyTaskManager;
+    public CitizenManager citizenManager;
 
     @Override
     public void onEnable() {
@@ -52,6 +53,7 @@ public final class ExtensiveDomains extends JavaPlugin {
     private void loadManagers() {
         this.configManager = new ConfigManager(this);
         this.domainTierManager = new DomainTierManager(this);
+        this.citizenManager = new CitizenManager();
         this.domainManager = new DomainManager(this);
         // todo remove below, pass it into "dataManager.loadData()" instead
         String databaseLocation = "database.db";

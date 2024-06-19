@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.Utils;
 import org.saulo.extensivedomains.domainactions.DomainAction;
+import org.saulo.extensivedomains.managers.CitizenManager;
 import org.saulo.extensivedomains.playerconditions.HasNameCondition;
 import org.saulo.extensivedomains.playerconditions.HasTitleCondition;
 import org.saulo.extensivedomains.managers.DomainManager;
@@ -21,6 +22,12 @@ import java.util.List;
 import java.util.UUID;
 
 public class ExtensiveDomainsCommand implements CommandExecutor {
+    private CitizenManager citizenManager;
+
+    public ExtensiveDomainsCommand(CitizenManager citizenManager) {
+        this.citizenManager = citizenManager;
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, String[] args) {
         if (commandSender instanceof Player) {
@@ -78,9 +85,13 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         }
     }
 
+    private Citizen getCitizenFromUUID(UUID uuid) {
+        return citizenManager.getRegisteredCitizen(uuid);
+    }
+
     private void setPopulation(Player player, String populationString) {
         UUID playerUUID = player.getUniqueId();
-        Citizen citizen = Mapper.getCitizenFromUUID(playerUUID);
+        Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
 
         int population = Integer.parseInt(populationString);
@@ -90,7 +101,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
 
     private void upgradeDomain(Player player) {
         UUID playerUUID = player.getUniqueId();
-        Citizen citizen = Mapper.getCitizenFromUUID(playerUUID);
+        Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
 
         DomainManager domainManager = ExtensiveDomains.instance.domainManager;
@@ -101,7 +112,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
 
     private void downgradeDomain(Player player) {
         UUID playerUUID = player.getUniqueId();
-        Citizen citizen = Mapper.getCitizenFromUUID(playerUUID);
+        Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
 
         DomainManager domainManager = ExtensiveDomains.instance.domainManager;
@@ -119,7 +130,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
 
     private void claimChunk(Player player) {
         UUID playerUUID = player.getUniqueId();
-        Citizen citizen = Mapper.getCitizenFromUUID(playerUUID);
+        Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
         Chunk chunk = Utils.getChunkAtPlayerLocation(player);
 
@@ -136,7 +147,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
 
     private void unclaimChunk(Player player) {
         UUID playerUUID = player.getUniqueId();
-        Citizen citizen = Mapper.getCitizenFromUUID(playerUUID);
+        Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
         Chunk chunk = Utils.getChunkAtPlayerLocation(player);
 
@@ -154,7 +165,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
     @Deprecated
     private void claims(Player player) {
         UUID playerUUID = player.getUniqueId();
-        Citizen citizen = Mapper.getCitizenFromUUID(playerUUID);
+        Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
         List<Claim> claims = domain.getClaims();
         player.sendMessage("Domain claims:");
@@ -167,7 +178,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
     @Deprecated
     private void print(Player player) {
         UUID playerUUID = player.getUniqueId();
-        Citizen citizen = Mapper.getCitizenFromUUID(playerUUID);
+        Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
         player.sendMessage("-- Domain --");
         player.sendMessage("Name: " + domain.getName());
@@ -184,7 +195,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
     @Deprecated
     private void isClaimed(Player player) {
         UUID playerUUID = player.getUniqueId();
-        Citizen citizen = Mapper.getCitizenFromUUID(playerUUID);
+        Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
         Chunk chunk = player.getLocation().getChunk();
         player.sendMessage("Chunk has been claimed: " + (domain.getClaimAtChunk(chunk) != null));
