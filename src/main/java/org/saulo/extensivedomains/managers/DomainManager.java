@@ -13,10 +13,15 @@ import java.util.UUID;
 public class DomainManager {
     private ExtensiveDomains plugin;
 
-    public DomainManager(ExtensiveDomains plugin) {
     private ClaimManager claimManager;
+    private DomainTierManager domainTierManager;
+
+    private Map<UUID, Domain> registeredDomains = new HashMap<>();
+
+    public DomainManager(ExtensiveDomains plugin, ClaimManager claimManager, DomainTierManager domainTierManager) {
         this.plugin = plugin;
         this.claimManager = claimManager;
+        this.domainTierManager = domainTierManager;
     }
     
     public void createDomain(Chunk chunk, Player player) {
