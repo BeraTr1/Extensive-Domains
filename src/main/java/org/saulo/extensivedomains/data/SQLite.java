@@ -5,6 +5,7 @@ import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.managers.CitizenManager;
+import org.saulo.extensivedomains.managers.DomainManager;
 import org.saulo.extensivedomains.objects.*;
 
 import java.io.File;
@@ -15,11 +16,14 @@ import java.util.UUID;
 
 public class SQLite implements Data {
     private final File databaseFile;
-    private CitizenManager citizenManager;
 
-    public SQLite(ExtensiveDomains plugin, String location, CitizenManager citizenManager) {
+    private CitizenManager citizenManager;
+    private DomainManager domainManager;
+
+    public SQLite(ExtensiveDomains plugin, String location, CitizenManager citizenManager, DomainManager domainManager) {
         this.databaseFile = new File(plugin.getDataFolder() + File.separator + location);
         this.citizenManager = citizenManager;
+        this.domainManager = domainManager;
     }
 
     public Connection connect() throws SQLException {
@@ -175,7 +179,7 @@ public class SQLite implements Data {
 
             if (domainUUIDString != null) {
                 UUID domainUUID = UUID.fromString(domainUUIDString);
-                Domain domain = Mapper.getDomainFromUUID(domainUUID);
+                Domain domain = domainManager.getRegisteredDomain(domainUUID);
                 System.out.println("\t\t\tDomain was found in Mapper: " + (domain != null));
                 citizen.setDomain(domain);
             } else {
@@ -210,7 +214,7 @@ public class SQLite implements Data {
     }
 
     private void saveDomains(Connection connection) {
-        List<Domain> domains = new ArrayList<>(Mapper.getUUIDDomainMap().values());
+        List<Domain> domains = domainManager.getRegisteredDomains();
 
         for (Domain domain : domains) {
             String domainUUIDString = domain.getUUID().toString();
@@ -237,7 +241,7 @@ public class SQLite implements Data {
                 UUID domainUUID = UUID.fromString(resultSet.getString("id"));
                 System.out.printf("\t\tPreloading domain with uuid (%s)\n", domainUUID);
                 Domain domain = new Domain(domainUUID);
-                Mapper.addDomainWithUUID(domain, domainUUID);
+                domainManager.registerDomain(domainUUID, domain);
             }
             System.out.println("\tFinished preloading domains!");
         } catch (Exception e) {
@@ -255,7 +259,7 @@ public class SQLite implements Data {
 
             while (resultSet.next()) {
                 UUID domainUUID = UUID.fromString(resultSet.getString("id"));
-                Domain domain = Mapper.getDomainFromUUID(domainUUID);
+                Domain domain = domainManager.getRegisteredDomain(domainUUID);
                 loadDomain(domain, resultSet);
             }
         } catch (Exception e) {
@@ -290,10 +294,7 @@ public class SQLite implements Data {
                     }
 
                     Chunk chunk = world.getChunkAt(coordX, coordZ);
-                    Claim claim = new Claim(domain, chunk);
-
-                    domain.addClaim(claim);
-                    Mapper.addClaimWithChunk(claim, chunk);
+                    domainManager.claimChunk(domain, chunk);
                 }
             }
 

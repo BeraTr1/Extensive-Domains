@@ -7,8 +7,7 @@ import org.saulo.extensivedomains.domainactions.DomainAction;
 import org.saulo.extensivedomains.playerconditions.Condition;
 import org.saulo.extensivedomains.objects.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class DomainManager {
     private ExtensiveDomains plugin;
@@ -23,24 +22,51 @@ public class DomainManager {
         this.claimManager = claimManager;
         this.domainTierManager = domainTierManager;
     }
-    
-    public void createDomain(Chunk chunk, Player player) {
-        // todo check if chunk is claimed
-        Citizen citizen = new Citizen(player);
-        Domain domain = new Domain(citizen);
-        Claim claim = new Claim(domain, chunk);
+
+    public void registerDomain(UUID uuid, Domain domain) {
+        this.registeredDomains.put(uuid, domain);
+    }
+
+    public void unregisterDomain(Domain domain) {
+        if (!this.domainIsRegistered(domain)) {
+            return;
+        }
+
+        UUID uuid = domain.getUUID();
+        this.registeredDomains.remove(uuid);
+    }
+
+    public boolean domainIsRegistered(Domain domain) {
+        UUID uuid = domain.getUUID();
+
+        return this.registeredDomains.containsKey(uuid);
+    }
+
+    public List<Domain> getRegisteredDomains() {
+        return new ArrayList<>(this.registeredDomains.values());
+    }
+
+    public Domain getRegisteredDomain(UUID uuid) {
+        return this.registeredDomains.getOrDefault(uuid, null);
+    }
+
+    public Domain createDomain(Chunk chunk, Citizen citizen) throws Exception {
+        Claim claim = claimManager.createClaim(chunk);
+        UUID uuid = UUID.randomUUID();
+
+        while (this.registeredDomains.containsKey(uuid)) {
+            uuid = UUID.randomUUID();
+        }
+
+        Domain domain = new Domain(uuid);
         domain.addClaim(claim);
-        citizen.setDomain(domain);
-        domain.addCitizen(citizen);
+        this.registerDomain(uuid, domain);
 
-        UUID domainUUID = domain.getUUID();
-        Mapper.addDomainWithUUID(domain, domainUUID);
-        Mapper.addClaimWithChunk(claim, chunk);
+        return domain;
+    }
 
-        DomainTierManager domainTierManager = ExtensiveDomains.instance.domainTierManager;
-        final int startingDomainTierLevel = 1;
-        DomainTier domainTier = domainTierManager.getDomainTierFromLevel(startingDomainTierLevel);
-        domain.setDomainTier(domainTier);
+    public void deleteDomain(Domain domain) {
+        // todo code to delete domain
     }
 
     public void claimChunk(Domain domain, Chunk chunk) throws Exception {

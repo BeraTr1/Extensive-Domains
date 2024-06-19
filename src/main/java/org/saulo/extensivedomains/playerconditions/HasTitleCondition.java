@@ -4,8 +4,6 @@ import org.bukkit.entity.Player;
 import org.saulo.extensivedomains.managers.CitizenManager;
 import org.saulo.extensivedomains.objects.Citizen;
 import org.saulo.extensivedomains.objects.CitizenTitle;
-import org.saulo.extensivedomains.objects.Mapper;
-
 import java.util.UUID;
 
 public class HasTitleCondition extends Condition {

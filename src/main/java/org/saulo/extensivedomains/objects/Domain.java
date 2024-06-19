@@ -11,23 +11,15 @@ import java.util.UUID;
 
 public class Domain {
     private String name = "";
-    private List<Claim> claims = new ArrayList<>();
     private UUID uuid;
 
+    private List<Claim> claims = new ArrayList<>();
     private List<Citizen> citizens = new ArrayList<>();
-    @Deprecated
-    private Citizen founder; // either create a head of state field OR replace this with "headOfState"
-    private Citizen headOfState;
-
     private double influence = 0.0;
     private int population = 0;
     private DomainTier domainTier;
 
-    public Domain(Citizen headOfState) {
-        this.headOfState = headOfState;
-        this.uuid = UUID.randomUUID(); //todo Domain(UUID uuid, etc.), get uuid when trying to load data (and fails) or when creating new domain,
-    }
-
+    // todo refactor, inject domain tier level instead
     public Domain(UUID uuid) {
         this.uuid = uuid;
 
@@ -149,5 +141,16 @@ public class Domain {
 
     public void addCitizen(Citizen citizen) {
         this.citizens.add(citizen);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Domain)) {
+            return false;
+        }
+
+        UUID uuid = ((Domain) obj).uuid;
+
+        return this.uuid == uuid;
     }
 }
