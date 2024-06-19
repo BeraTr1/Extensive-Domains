@@ -9,11 +9,7 @@ public class Citizen {
     private Player player;
     private UUID uuid;
     private Domain domain;
-    private CurrencyAccount primaryCurrencyAccount;
-    private List<CurrencyAccount> currencyAccounts;
     private CitizenTitle title; // if more are to be allowed, there needs to be a way to rank each title (i.e. check which rank is higher)
-    private Shop shop;
-    private VirtualInventory inventory = new VirtualInventory();
 
     public Citizen(Player player) {
         this.player = player;
@@ -44,26 +40,6 @@ public class Citizen {
 
     public boolean hasTitle(CitizenTitle citizenTitle) {
         return false;
-    }
-
-    public CurrencyAccount getPrimaryCurrencyAccount() {
-        return this.primaryCurrencyAccount;
-    }
-
-    public void setPrimaryCurrencyAccount(CurrencyAccount currencyAccount) {
-        this.primaryCurrencyAccount = currencyAccount;
-    }
-
-    public Shop getShop() {
-        return this.shop;
-    }
-
-    public void setShop(Shop shop) {
-        this.shop = shop;
-    }
-
-    public VirtualInventory getInventory() {
-        return this.inventory;
     }
 
     public UUID getUUID() {

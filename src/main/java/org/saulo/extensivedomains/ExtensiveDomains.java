@@ -17,7 +17,6 @@ public final class ExtensiveDomains extends JavaPlugin {
     public ConfigManager configManager;
     public DomainTierManager domainTierManager;
     public DomainManager domainManager;
-    public EconomyManager economyManager;
     public DataManager dataManager;
     public DailyTaskManager dailyTaskManager;
 
@@ -54,7 +53,6 @@ public final class ExtensiveDomains extends JavaPlugin {
         this.configManager = new ConfigManager(this);
         this.domainTierManager = new DomainTierManager(this);
         this.domainManager = new DomainManager(this);
-        this.economyManager = new EconomyManager(this);
         // todo remove below, pass it into "dataManager.loadData()" instead
         String databaseLocation = "database.db";
         Data data = new SQLite(databaseLocation);

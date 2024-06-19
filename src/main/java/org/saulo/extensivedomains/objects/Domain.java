@@ -21,10 +21,7 @@ public class Domain {
 
     private double influence = 0.0;
     private int population = 0;
-    private CurrencyAccount primaryCurrencyAccount;
-    private List<CurrencyAccount> currencyAccounts; //todo remove, only 1 account per object will be used
     private DomainTier domainTier;
-    private MarketCenter marketCenter = new MarketCenter();
 
     public Domain(Citizen headOfState) {
         this.headOfState = headOfState;
@@ -121,14 +118,6 @@ public class Domain {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public CurrencyAccount getPrimaryCurrencyAccount() {
-        return this.primaryCurrencyAccount;
-    }
-
-    public void setPrimaryCurrencyAccount(Currency currency) {
-        this.primaryCurrencyAccount = new CurrencyAccount(currency);
     }
 
     @NotNull

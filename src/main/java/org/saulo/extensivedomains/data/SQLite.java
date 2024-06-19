@@ -102,14 +102,11 @@ public class SQLite implements Data {
         }
     }
 
-    private void insertCitizen(Connection connection, String citizenUUID, String domainUUID, String currencyUUID, double currencyBalance, String shopUUID) {
+    private void insertCitizen(Connection connection, String citizenUUID, String domainUUID) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("REPLACE INTO Citizens (citizen_id, domain_id, currency_id, currency_balance, shop_id) VALUES (?, ?, ?, ?, ?)");
             preparedStatement.setString(1, citizenUUID);
             preparedStatement.setString(2, domainUUID);
-            preparedStatement.setString(3, currencyUUID);
-            preparedStatement.setDouble(4, currencyBalance);
-            preparedStatement.setString(5, shopUUID);
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -123,11 +120,8 @@ public class SQLite implements Data {
         for (Citizen citizen : citizens) {
             String citizenUUIDString = citizen.getUUID().toString();
             String domainUUIDString = citizen.getDomain().getUUID().toString();
-            String currencyUUIDString = citizen.getPrimaryCurrencyAccount() == null ? null : citizen.getPrimaryCurrencyAccount().getCurrency().getUUID().toString();
-            double currencyBalance = citizen.getPrimaryCurrencyAccount() == null ? 0 : citizen.getPrimaryCurrencyAccount().getBalance();
-            String shopUUIDString = citizen.getShop() == null ? null : citizen.getShop().getUUID().toString();
 
-            this.insertCitizen(connection, citizenUUIDString, domainUUIDString, currencyUUIDString, currencyBalance, shopUUIDString);
+            this.insertCitizen(connection, citizenUUIDString, domainUUIDString);
             System.out.printf("\t\tSaved citizen with uuid (%s)\n", citizenUUIDString);
         }
     }
@@ -191,25 +185,6 @@ public class SQLite implements Data {
             } else {
                 System.out.println("\t\t\tDomain uuid is null!");
             }
-
-            String currencyUUIDString = resultSet.getString("currency_id");
-
-            if (currencyUUIDString != null) {
-                UUID currencyUUID = UUID.fromString(currencyUUIDString);
-                Currency currency = Mapper.getCurrencyFromUUID(currencyUUID);
-                CurrencyAccount currencyAccount = new CurrencyAccount(currency);
-                double currencyBalance = resultSet.getDouble("currency_balance");
-                currencyAccount.setBalance(currencyBalance);
-                citizen.setPrimaryCurrencyAccount(currencyAccount);
-            }
-
-            String shopUUIDString = resultSet.getString("shop_id");
-
-            if (shopUUIDString != null) {
-                UUID shopUUID = UUID.fromString(shopUUIDString);
-                Shop shop = Mapper.getShopFromUUID(shopUUID);
-                citizen.setShop(shop);
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -225,15 +200,13 @@ public class SQLite implements Data {
         }
     }
 
-    private void insertDomain(Connection connection, String domainUUIDString, String domainName, String domainClaims, String domainCitizens, String domainCurrencyUUID, double domainCurrencyBalance) {
+    private void insertDomain(Connection connection, String domainUUIDString, String domainName, String domainClaims, String domainCitizens) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("REPLACE INTO Domains (id, name, claims, citizens, currency_id, currency_balance) VALUES (?, ?, ?, ?, ?, ?)");
             preparedStatement.setString(1, domainUUIDString);
             preparedStatement.setString(2, domainName);
             preparedStatement.setString(3, domainClaims);
             preparedStatement.setString(4, domainCitizens);
-            preparedStatement.setString(5, domainCurrencyUUID);
-            preparedStatement.setDouble(6, domainCurrencyBalance);
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -248,11 +221,9 @@ public class SQLite implements Data {
             String domainName = domain.getName();
             String domainClaims = domain.getClaimsAsString();
             String domainCitizens = domain.getCitizensAsString();
-            String domainCurrencyUUID = domain.getPrimaryCurrencyAccount() == null ? null : domain.getPrimaryCurrencyAccount().getCurrency().getUUID().toString();
-            double domainCurrencyBalance = domain.getPrimaryCurrencyAccount() == null ? 0 : domain.getPrimaryCurrencyAccount().getBalance();
             int domainTierLevel = domain.getDomainTier().getLevel();
 
-            this.insertDomain(connection, domainUUIDString, domainName, domainClaims, domainCitizens, domainCurrencyUUID, domainCurrencyBalance);
+            this.insertDomain(connection, domainUUIDString, domainName, domainClaims, domainCitizens);
         }
     }
 
@@ -339,23 +310,6 @@ public class SQLite implements Data {
                     UUID uuid = UUID.fromString(citizenUUIDString);
                     Citizen citizen = Mapper.getCitizenFromUUID(uuid);
                     domain.addCitizen(citizen);
-                }
-            }
-
-            String currencyUUIDString = resultSet.getString("currency_id");
-            String currencyBalanceString = resultSet.getString("currency_balance");
-
-            if (currencyUUIDString != null) {
-                UUID uuid = UUID.fromString(currencyUUIDString);
-                Currency currency = Mapper.getCurrencyFromUUID(uuid);
-
-                if (currency != null) {
-                    domain.setPrimaryCurrencyAccount(currency);
-                }
-
-                if (currencyBalanceString != null && currency != null) {
-                    double balance = Double.parseDouble(currencyBalanceString);
-                    domain.getPrimaryCurrencyAccount().setBalance(balance);
                 }
             }
         } catch (Exception e) {
