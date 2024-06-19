@@ -14,7 +14,9 @@ public class DomainManager {
     private ExtensiveDomains plugin;
 
     public DomainManager(ExtensiveDomains plugin) {
+    private ClaimManager claimManager;
         this.plugin = plugin;
+        this.claimManager = claimManager;
     }
     
     public void createDomain(Chunk chunk, Player player) {
@@ -37,53 +39,23 @@ public class DomainManager {
     }
 
     public void claimChunk(Domain domain, Chunk chunk) throws Exception {
-        if (chunkIsClaimed(chunk)) {
-            throw new Exception("This chunk is already claimed");
-        }
-
-        Claim claim = new Claim(domain, chunk);
+        Claim claim = claimManager.createClaim(chunk);
         domain.addClaim(claim);
-        Mapper.addClaimWithChunk(claim, chunk);
-        //todo create map for UUID -> Claim ?
     }
 
     public void unclaimChunk(Domain domain, Chunk chunk) throws Exception {
-        if (!chunkIsClaimed(chunk)) {
-            throw new Exception("This chunk is not claimed");
+        Claim claim = claimManager.getRegisteredClaim(chunk);
+
+        if (!domainHasClaim(domain, claim)) {
+            throw new Exception("Domain doesn't own this chunk!");
         }
 
-        Claim claim = Mapper.getClaimFromChunk(chunk);
-        Domain claimOwnerDomain = claim.getDomain();
-
-        if (!claimOwnerDomain.equals(domain)) {
-            throw new Exception("Domain does not own this chunk");
-        }
-
+        claimManager.unregisterClaim(claim);
         domain.removeClaim(claim);
-        //todo remove claim from unclaimed chunk in Mapper
     }
 
-    public boolean chunkIsClaimed(Chunk chunk) {
-        Claim claim = Mapper.getClaimFromChunk(chunk);
-        boolean chunkIsClaimed = claim != null;
-
-        return chunkIsClaimed;
-    }
-
-    public void addClaimProtection(Claim claim, ClaimProtection claimProtection) {
-        if (claim == null) {
-            return;
-        }
-
-        claim.addProtection(claimProtection);
-    }
-
-    public void addClaimPermission(Claim claim, ClaimPermission.ClaimAction claimAction, Condition condition) {
-        claim.getClaimPermission().addPermissionCondition(claimAction, condition);
-    }
-
-    public static void removeClaimPermission() {
-
+    public boolean domainHasClaim(Domain domain, Claim claim) {
+        return claim.getDomain().equals(domain);
     }
 
     public boolean playerHasPermission(Player player, Claim claim, ClaimPermission.ClaimAction claimAction) {

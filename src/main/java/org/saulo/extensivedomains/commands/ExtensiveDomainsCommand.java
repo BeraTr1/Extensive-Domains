@@ -13,6 +13,7 @@ import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.Utils;
 import org.saulo.extensivedomains.domainactions.DomainAction;
 import org.saulo.extensivedomains.managers.CitizenManager;
+import org.saulo.extensivedomains.managers.ClaimManager;
 import org.saulo.extensivedomains.playerconditions.HasNameCondition;
 import org.saulo.extensivedomains.playerconditions.HasTitleCondition;
 import org.saulo.extensivedomains.managers.DomainManager;
@@ -23,9 +24,11 @@ import java.util.UUID;
 
 public class ExtensiveDomainsCommand implements CommandExecutor {
     private CitizenManager citizenManager;
+    private ClaimManager claimManager;
 
-    public ExtensiveDomainsCommand(CitizenManager citizenManager) {
+    public ExtensiveDomainsCommand(CitizenManager citizenManager, ClaimManager claimManager) {
         this.citizenManager = citizenManager;
+        this.claimManager = claimManager;
     }
 
     @Override
@@ -124,7 +127,14 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
     private void createDomain(Player player) {
         Chunk chunk = Utils.getChunkAtPlayerLocation(player);
         DomainManager domainManager = ExtensiveDomains.instance.domainManager;
-        domainManager.createDomain(chunk, player);
+        UUID playerUUID = player.getUniqueId();
+        Citizen citizen = citizenManager.getRegisteredCitizen(playerUUID);
+        try {
+            domainManager.createDomain(chunk, citizen);
+        } catch (Exception e) {
+            player.sendMessage(e.getMessage());
+        }
+
         player.sendMessage("Created a domain");
     }
 
@@ -204,10 +214,10 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
     @Deprecated
     private void addClaimProtection(Player player, String protectionName) {
         Chunk chunk = player.getLocation().getChunk();
-        Claim claim = Mapper.getClaimFromChunk(chunk);
+        Claim claim = getClaimFromChunk(chunk);
         ClaimProtection claimProtection = ClaimProtection.getProtectionFromName(protectionName);
         DomainManager domainManager = ExtensiveDomains.instance.domainManager;
-        domainManager.addClaimProtection(claim, claimProtection);
+        claimManager.addClaimProtection(claim, claimProtection);
 
         // todo remove below
         if (claim == null) {
@@ -225,16 +235,16 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
 
     private void addPermission(Player player, String actionName, String conditionName, String conditionArg) {
         Chunk chunk = player.getLocation().getChunk();
-        Claim claim = Mapper.getClaimFromChunk(chunk);
+        Claim claim = getClaimFromChunk(chunk);
         ClaimPermission.ClaimAction claimAction = ClaimPermission.ClaimAction.getClaimActionByName(actionName);
         DomainManager domainManager = ExtensiveDomains.instance.domainManager;
 
         switch (conditionName.toLowerCase()) {
             case "player-with-title":
-                domainManager.addClaimPermission(claim, claimAction, new HasTitleCondition(conditionArg));
+                claimManager.addClaimPermission(claim, claimAction, new HasTitleCondition(conditionArg));
                 break;
             case "player-with-name":
-                domainManager.addClaimPermission(claim, claimAction, new HasNameCondition(conditionArg));
+                claimManager.addClaimPermission(claim, claimAction, new HasNameCondition(conditionArg));
                 break;
             case "player-belongs-to":
                 break;
@@ -243,5 +253,9 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
 
     private void removePermission(Player player, String actionName) {
 
+    }
+
+    private Claim getClaimFromChunk(Chunk chunk) {
+        return this.claimManager.getRegisteredClaim(chunk);
     }
 }

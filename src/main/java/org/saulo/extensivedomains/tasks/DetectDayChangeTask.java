@@ -8,6 +8,7 @@ public class DetectDayChangeTask implements Runnable {
 
     @Override
     public void run() {
+        // todo get list of worlds the plugin is running on
         int currentTime = (int) (Bukkit.getWorld("world").getTime() % 24000);
         boolean dayHasPassed = currentTime < this.lastTime;
 

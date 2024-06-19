@@ -21,6 +21,7 @@ public class ExtensiveDomains extends JavaPlugin {
     public DataManager dataManager;
     public DailyTaskManager dailyTaskManager;
     public CitizenManager citizenManager;
+    public ClaimManager claimManager;
 
     @Override
     public void onEnable() {
@@ -43,23 +44,24 @@ public class ExtensiveDomains extends JavaPlugin {
     private void registerEventListeners() {
         PluginManager pluginManager = this.getServer().getPluginManager();
 
-        pluginManager.registerEvents(new BlockListener(), this);
+        pluginManager.registerEvents(new BlockListener(claimManager), this);
         pluginManager.registerEvents(new ChangeDayListener(), this);
         pluginManager.registerEvents(new PlayerListener(citizenManager), this);
     }
 
     private void registerCommands() {
-        this.getCommand("extensivedomains").setExecutor(new ExtensiveDomainsCommand(citizenManager));
+        this.getCommand("extensivedomains").setExecutor(new ExtensiveDomainsCommand(citizenManager, claimManager));
     }
 
     private void loadManagers() {
         this.configManager = new ConfigManager(this);
         this.domainTierManager = new DomainTierManager(this);
         this.citizenManager = new CitizenManager();
-        this.domainManager = new DomainManager(this);
+        this.claimManager = new ClaimManager();
+        this.domainManager = new DomainManager(this, claimManager, domainTierManager);
         // todo remove below, pass it into "dataManager.loadData()" instead
         String databaseLocation = "database.db";
-        Data data = new SQLite(this, databaseLocation, citizenManager);
+        Data data = new SQLite(this, databaseLocation, citizenManager, domainManager);
         this.dataManager = new DataManager(this, data);
         this.dailyTaskManager = new DailyTaskManager(this);
     }

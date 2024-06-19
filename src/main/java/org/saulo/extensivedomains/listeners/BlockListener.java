@@ -9,10 +9,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.saulo.extensivedomains.ExtensiveDomains;
+import org.saulo.extensivedomains.managers.ClaimManager;
 import org.saulo.extensivedomains.managers.DomainManager;
 import org.saulo.extensivedomains.objects.*;
 
 public class BlockListener implements Listener {
+    private ClaimManager claimManager;
+
+    public BlockListener(ClaimManager claimManager) {
+        this.claimManager = claimManager;
+    }
+
     @EventHandler
     public void onBlockFromToEvent(BlockFromToEvent event) {
         System.out.println("Block moving from one location to another (liquid block)");
@@ -20,13 +27,13 @@ public class BlockListener implements Listener {
         Block sourceBlock = event.getBlock();
         Location sourceLocation = sourceBlock.getLocation();
         Chunk sourceChunk = sourceBlock.getChunk();
-        Claim sourceClaim = Mapper.getClaimFromChunk(sourceChunk);
+        Claim sourceClaim = claimManager.getRegisteredClaim(sourceChunk);
         boolean sourceChunkIsClaimed = sourceClaim != null;
 
         Block toBlock = event.getToBlock();
         Location toLocation = toBlock.getLocation();
         Chunk toChunk = toBlock.getChunk();
-        Claim toClaim = Mapper.getClaimFromChunk(toChunk);
+        Claim toClaim = claimManager.getRegisteredClaim(toChunk);
         boolean toChunkIsClaimed = toClaim != null;
 
         boolean bothClaimsBelongToSameDomain = sourceChunkIsClaimed && toChunkIsClaimed && (sourceClaim.getDomain().equals(toClaim.getDomain()));
@@ -56,7 +63,7 @@ public class BlockListener implements Listener {
     public void onBlockBreakEvent(BlockBreakEvent event) {
         Player player = event.getPlayer();
         Chunk chunk = event.getBlock().getChunk();
-        Claim claim = Mapper.getClaimFromChunk(chunk);
+        Claim claim = claimManager.getRegisteredClaim(chunk);
 
         if (claim == null) {
             return;
