@@ -59,16 +59,16 @@ public class ExtensiveDomains extends JavaPlugin {
         this.domainManager = new DomainManager(this);
         // todo remove below, pass it into "dataManager.loadData()" instead
         String databaseLocation = "database.db";
-        Data data = new SQLite(databaseLocation, citizenManager);
+        Data data = new SQLite(this, databaseLocation, citizenManager);
         this.dataManager = new DataManager(this, data);
         this.dailyTaskManager = new DailyTaskManager(this);
     }
 
     public void loadData() {
-//        this.dataManager.loadData();
+        this.dataManager.loadData();
     }
 
     public void saveData() {
-//        this.dataManager.saveData();
+        this.dataManager.saveData();
     }
 }

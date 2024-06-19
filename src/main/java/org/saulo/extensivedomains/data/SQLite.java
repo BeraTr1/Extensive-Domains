@@ -17,59 +17,52 @@ public class SQLite implements Data {
     private final File databaseFile;
     private CitizenManager citizenManager;
 
-    public SQLite(String location, CitizenManager citizenManager) {
-        this.databaseFile = new File(ExtensiveDomains.instance.getDataFolder() + File.separator + location);
+    public SQLite(ExtensiveDomains plugin, String location, CitizenManager citizenManager) {
+        this.databaseFile = new File(plugin.getDataFolder() + File.separator + location);
         this.citizenManager = citizenManager;
     }
 
-    public Connection connect() {
-        try {
-            String url = "jdbc:sqlite:" + this.databaseFile.getAbsolutePath();
-            Connection connection = DriverManager.getConnection(url);
+    public Connection connect() throws SQLException {
+        String url = "jdbc:sqlite:" + this.databaseFile.getAbsolutePath();
+        Connection connection = DriverManager.getConnection(url);
 
-            System.out.println("Established connection to SQLite");
-            return connection;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        return null;
+        System.out.println("Established connection to SQLite");
+        return connection;
     }
 
     @Override
     public void saveAll() {
-        Connection connection = connect();
-
-        createCitizensTable(connection);
-        createDomainsTable(connection);
-
-        System.out.println("Saving data...");
-        saveCitizens(connection);
-        saveDomains(connection);
-        System.out.println("Successfully saved all data!");
-
         try {
+            Connection connection = connect();
+            createCitizensTable(connection);
+            createDomainsTable(connection);
+
+            System.out.println("Saving data...");
+            saveCitizens(connection);
+            saveDomains(connection);
+            System.out.println("Successfully saved all data!");
+
             connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
     }
 
     @Override
     public void loadAll() {
-        Connection connection = connect();
-
-        preloadAll(connection);
-
-        System.out.println("Loading data...");
-        loadCitizens(connection);
-        loadDomains(connection);
-        System.out.println("Successfully loaded all data!");
-
         try {
+            Connection connection = connect();
+
+            preloadAll(connection);
+
+            System.out.println("Loading data...");
+            loadCitizens(connection);
+            loadDomains(connection);
+            System.out.println("Successfully loaded all data!");
+
             connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -98,7 +91,7 @@ public class SQLite implements Data {
     private void createCitizensTable(Connection connection) {
         try {
             Statement statement = connection.createStatement();
-            String query = "CREATE TABLE IF NOT EXISTS Citizens(citizen_id varchar(255) primary key, domain_id varchar(255), currency_id varchar(255), currency_balance real, shop_id varchar(255))";
+            String query = "CREATE TABLE IF NOT EXISTS Citizens(citizen_id varchar(255) primary key, domain_id varchar(255))";
             statement.executeUpdate(query);
         } catch (Exception e) {
             e.printStackTrace();
@@ -107,7 +100,7 @@ public class SQLite implements Data {
 
     private void insertCitizen(Connection connection, String citizenUUID, String domainUUID) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("REPLACE INTO Citizens (citizen_id, domain_id, currency_id, currency_balance, shop_id) VALUES (?, ?, ?, ?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("REPLACE INTO Citizens (citizen_id, domain_id) VALUES (?, ?)");
             preparedStatement.setString(1, citizenUUID);
             preparedStatement.setString(2, domainUUID);
             preparedStatement.execute();
@@ -196,7 +189,7 @@ public class SQLite implements Data {
     private void createDomainsTable(Connection connection) {
         try {
             Statement statement = connection.createStatement();
-            String query = "CREATE TABLE IF NOT EXISTS Domains(id varchar(255) primary key, name varchar(255), claims text[], citizens text[], currency_id varchar(255), currency_balance real)";
+            String query = "CREATE TABLE IF NOT EXISTS Domains(id varchar(255) primary key, name varchar(255), claims text[], citizens text[])";
             statement.executeUpdate(query);
         } catch (Exception e) {
             e.printStackTrace();
@@ -205,7 +198,7 @@ public class SQLite implements Data {
 
     private void insertDomain(Connection connection, String domainUUIDString, String domainName, String domainClaims, String domainCitizens) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("REPLACE INTO Domains (id, name, claims, citizens, currency_id, currency_balance) VALUES (?, ?, ?, ?, ?, ?)");
+            PreparedStatement preparedStatement = connection.prepareStatement("REPLACE INTO Domains (id, name, claims, citizens) VALUES (?, ?, ?, ?)");
             preparedStatement.setString(1, domainUUIDString);
             preparedStatement.setString(2, domainName);
             preparedStatement.setString(3, domainClaims);
@@ -318,18 +311,6 @@ public class SQLite implements Data {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-    }
-
-    private void saveCurrencies() {
-
-    }
-
-    private void preloadCurrencies(Connection connection) {
-
-    }
-
-    private void loadCurrencies() {
 
     }
 }
