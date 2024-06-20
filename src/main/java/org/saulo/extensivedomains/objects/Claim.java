@@ -14,7 +14,8 @@ public class Claim {
     private List<ClaimProtection> claimProtections = new ArrayList<>();
     private ClaimPermission claimPermission;
 
-    public Claim(Chunk chunk) {
+    public Claim(Domain domain, Chunk chunk) {
+        this.domain = domain;
         this.chunk = chunk;
         this.claimPermission = new ClaimPermission();
     }

@@ -5,6 +5,7 @@ import org.saulo.extensivedomains.exceptions.ExtensiveDomainsException;
 import org.saulo.extensivedomains.objects.Claim;
 import org.saulo.extensivedomains.objects.ClaimPermission;
 import org.saulo.extensivedomains.objects.ClaimProtection;
+import org.saulo.extensivedomains.objects.Domain;
 import org.saulo.extensivedomains.playerconditions.Condition;
 
 import java.util.HashMap;
@@ -45,7 +46,7 @@ public class ClaimManager {
             throw new ExtensiveDomainsException("Chunk is already claimed!");
         }
 
-        Claim claim = new Claim(chunk);
+        Claim claim = new Claim(domain, chunk);
         registerClaim(chunk, claim);
 
         return claim;

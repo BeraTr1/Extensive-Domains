@@ -74,14 +74,20 @@ public class DomainManager {
         }
 
         Domain domain = new Domain(uuid);
+        Claim claim = claimManager.createClaim(domain, chunk);
         domain.addClaim(claim);
         this.registerDomain(uuid, domain);
 
         return domain;
     }
 
-    public void deleteDomain(Domain domain) {
-        // todo code to delete domain
+    public void deleteDomain(Domain domain) throws ExtensiveDomainsException {
+        if (domain == null) {
+            throw new ExtensiveDomainsException("Domain doesn't exist!");
+        }
+
+        UUID uuid = domain.getUUID();
+        this.registeredDomains.remove(uuid);
     }
 
     public void claimChunk(Domain domain, Chunk chunk) throws ExtensiveDomainsException {
@@ -105,7 +111,16 @@ public class DomainManager {
     }
 
     public boolean domainHasClaim(Domain domain, Claim claim) {
+        if (claim == null) {
+            return false;
+        }
+
         return claim.getDomain().equals(domain);
+    }
+
+    public boolean domainHasClaim(Domain domain, Chunk chunk) {
+        Claim claim = claimManager.getRegisteredClaim(chunk);
+        return this.domainHasClaim(domain, claim);
     }
 
     public boolean playerHasPermission(Player player, Claim claim, ClaimPermission.ClaimAction claimAction) {

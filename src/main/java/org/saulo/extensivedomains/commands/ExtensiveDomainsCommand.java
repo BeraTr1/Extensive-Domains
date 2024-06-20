@@ -125,12 +125,10 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
     }
 
     private void createDomain(Player player) {
-        Chunk chunk = Utils.getChunkAtPlayerLocation(player);
-        DomainManager domainManager = ExtensiveDomains.instance.domainManager;
-        UUID playerUUID = player.getUniqueId();
-        Citizen citizen = citizenManager.getRegisteredCitizen(playerUUID);
         try {
-            domainManager.createDomain(chunk, citizen);
+            Chunk chunk = Utils.getChunkAtPlayerLocation(player);
+            DomainManager domainManager = ExtensiveDomains.instance.domainManager;
+            domainManager.createDomain(chunk);
         } catch (Exception e) {
             player.sendMessage(e.getMessage());
         }
