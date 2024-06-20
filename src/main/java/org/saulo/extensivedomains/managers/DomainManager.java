@@ -23,7 +23,6 @@ public class DomainManager {
         this.domainTierManager = domainTierManager;
     }
 
-    public void registerDomain(UUID uuid, Domain domain) {
     public void registerDomain(UUID uuid, Domain domain) throws ExtensiveDomainsException {
         if (uuid == null || domain == null) {
             throw new ExtensiveDomainsException("Domain or UUID doesn't exist!");
@@ -85,13 +84,12 @@ public class DomainManager {
         // todo code to delete domain
     }
 
-    public void claimChunk(Domain domain, Chunk chunk) throws Exception {
-        Claim claim = claimManager.createClaim(chunk);
     public void claimChunk(Domain domain, Chunk chunk) throws ExtensiveDomainsException {
         if (domain == null || chunk == null) {
             throw new ExtensiveDomainsException("Domain or chunk doesn't exist!");
         }
 
+        Claim claim = claimManager.createClaim(domain, chunk);
         domain.addClaim(claim);
     }
 
