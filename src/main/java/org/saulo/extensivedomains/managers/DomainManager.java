@@ -4,7 +4,7 @@ import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.saulo.extensivedomains.ExtensiveDomains;
 import org.saulo.extensivedomains.domainactions.DomainAction;
-import org.saulo.extensivedomains.playerconditions.Condition;
+import org.saulo.extensivedomains.exceptions.ExtensiveDomainsException;
 import org.saulo.extensivedomains.objects.*;
 
 import java.util.*;
@@ -24,12 +24,21 @@ public class DomainManager {
     }
 
     public void registerDomain(UUID uuid, Domain domain) {
+    public void registerDomain(UUID uuid, Domain domain) throws ExtensiveDomainsException {
+        if (uuid == null || domain == null) {
+            throw new ExtensiveDomainsException("Domain or UUID doesn't exist!");
+        }
+
         this.registeredDomains.put(uuid, domain);
     }
 
-    public void unregisterDomain(Domain domain) {
-        if (!this.domainIsRegistered(domain)) {
-            return;
+    public void unregisterDomain(Domain domain) throws ExtensiveDomainsException {
+        if (domain == null) {
+            throw new ExtensiveDomainsException("Domain doesn't exist!");
+        }
+
+        if (this.domainIsRegistered(domain)) {
+            throw new ExtensiveDomainsException("Domain is already registered!");
         }
 
         UUID uuid = domain.getUUID();
@@ -50,8 +59,15 @@ public class DomainManager {
         return this.registeredDomains.getOrDefault(uuid, null);
     }
 
-    public Domain createDomain(Chunk chunk, Citizen citizen) throws Exception {
-        Claim claim = claimManager.createClaim(chunk);
+    public Domain createDomain(Chunk chunk) throws ExtensiveDomainsException {
+        if (chunk == null) {
+            throw new ExtensiveDomainsException("Chunk doesn't exist!");
+        }
+
+        if (claimManager.chunkIsClaimed(chunk)) {
+            throw new ExtensiveDomainsException("Chunk is already claimed!");
+        }
+
         UUID uuid = UUID.randomUUID();
 
         while (this.registeredDomains.containsKey(uuid)) {
@@ -71,14 +87,19 @@ public class DomainManager {
 
     public void claimChunk(Domain domain, Chunk chunk) throws Exception {
         Claim claim = claimManager.createClaim(chunk);
+    public void claimChunk(Domain domain, Chunk chunk) throws ExtensiveDomainsException {
+        if (domain == null || chunk == null) {
+            throw new ExtensiveDomainsException("Domain or chunk doesn't exist!");
+        }
+
         domain.addClaim(claim);
     }
 
-    public void unclaimChunk(Domain domain, Chunk chunk) throws Exception {
+    public void unclaimChunk(Domain domain, Chunk chunk) throws ExtensiveDomainsException {
         Claim claim = claimManager.getRegisteredClaim(chunk);
 
         if (!domainHasClaim(domain, claim)) {
-            throw new Exception("Domain doesn't own this chunk!");
+            throw new ExtensiveDomainsException("Domain doesn't own this chunk!");
         }
 
         claimManager.unregisterClaim(claim);

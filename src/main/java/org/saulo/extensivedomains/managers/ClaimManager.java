@@ -1,6 +1,7 @@
 package org.saulo.extensivedomains.managers;
 
 import org.bukkit.Chunk;
+import org.saulo.extensivedomains.exceptions.ExtensiveDomainsException;
 import org.saulo.extensivedomains.objects.Claim;
 import org.saulo.extensivedomains.objects.ClaimPermission;
 import org.saulo.extensivedomains.objects.ClaimProtection;
@@ -39,9 +40,9 @@ public class ClaimManager {
         return this.claimIsRegistered(chunk);
     }
 
-    public Claim createClaim(Chunk chunk) throws Exception {
+    public Claim createClaim(Domain domain, Chunk chunk) throws ExtensiveDomainsException {
         if (chunkIsClaimed(chunk)) {
-            throw new Exception();
+            throw new ExtensiveDomainsException("Chunk is already claimed!");
         }
 
         Claim claim = new Claim(chunk);
