@@ -1,6 +1,6 @@
 name: ExtensiveDomains
 version: '${project.version}'
-main: org.saulo.extensivedomains.ExtensiveDomains
+main: com.extensivedomains.ExtensiveDomains
 api-version: '1.20'
 
 # Commands #
