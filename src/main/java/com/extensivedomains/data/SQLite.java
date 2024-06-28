@@ -1,8 +1,8 @@
 package com.extensivedomains.data;
 
-import com.extensivedomains.managers.CitizenManager;
-import com.extensivedomains.managers.DomainManager;
+import com.extensivedomains.managers.*;
 import com.extensivedomains.ExtensiveDomains;
+import com.extensivedomains.objects.domain.tier.DomainTier;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
@@ -21,11 +21,13 @@ public class SQLite implements Data {
 
     private CitizenManager citizenManager;
     private DomainManager domainManager;
+    private DomainTierManager domainTierManager;
 
-    public SQLite(ExtensiveDomains plugin, String location, CitizenManager citizenManager, DomainManager domainManager) {
+    public SQLite(ExtensiveDomains plugin, String location, CitizenManager citizenManager, DomainManager domainManager, DomainTierManager domainTierManager) {
         this.databaseFile = new File(plugin.getDataFolder() + File.separator + location);
         this.citizenManager = citizenManager;
         this.domainManager = domainManager;
+        this.domainTierManager = domainTierManager;
     }
 
     public Connection connect() throws SQLException {
@@ -115,12 +117,14 @@ public class SQLite implements Data {
         }
     }
 
+    // todo change how citizens are saved
     private void saveCitizens(Connection connection) {
         List<Citizen> citizens = citizenManager.getCitizenInstances();
         System.out.println("\tTrying to save (" + citizens.size() + ") citizens...");
 
         for (Citizen citizen : citizens) {
             String citizenUUIDString = citizen.getUUID().toString();
+            // not all citizens have domains
             String domainUUIDString = citizen.getDomain().getUUID().toString();
 
             this.insertCitizen(connection, citizenUUIDString, domainUUIDString);
@@ -242,8 +246,11 @@ public class SQLite implements Data {
             while (resultSet.next()) {
                 UUID domainUUID = UUID.fromString(resultSet.getString("id"));
                 System.out.printf("\t\tPreloading domain with uuid (%s)\n", domainUUID);
-                Domain domain = new Domain(domainUUID);
+                int domainTierLevel = 0; // todo load tier level
+                DomainTier domainTier = domainTierManager.getRegisteredDomainTier(domainTierLevel); // todo load saved tier or tier closest to saved tier
+                Domain domain = new Domain(domainUUID, domainTier);
                 domainManager.registerDomain(domainUUID, domain);
+
             }
             System.out.println("\tFinished preloading domains!");
         } catch (Exception e) {

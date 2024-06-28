@@ -1,28 +1,25 @@
 package com.extensivedomains.managers;
 
-import com.extensivedomains.ExtensiveDomains;
+import com.extensivedomains.conditions.domainconditions.DomainCondition;
 import com.extensivedomains.exceptions.ExtensiveDomainsException;
+import com.extensivedomains.objects.citizen.Citizen;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import com.extensivedomains.objects.claim.Claim;
 import com.extensivedomains.objects.claim.ClaimPermission;
 import com.extensivedomains.objects.domain.Domain;
 import com.extensivedomains.objects.domain.actions.DomainAction;
-import com.extensivedomains.exceptions.ExtensiveDomainsException;
 import com.extensivedomains.objects.domain.tier.DomainTier;
 
 import java.util.*;
 
 public class DomainManager {
-    private ExtensiveDomains plugin;
+    private final ClaimManager claimManager;
+    private final DomainTierManager domainTierManager;
 
-    private ClaimManager claimManager;
-    private DomainTierManager domainTierManager;
+    private final Map<UUID, Domain> registeredDomains = new HashMap<>();
 
-    private Map<UUID, Domain> registeredDomains = new HashMap<>();
-
-    public DomainManager(ExtensiveDomains plugin, ClaimManager claimManager, DomainTierManager domainTierManager) {
-        this.plugin = plugin;
+    public DomainManager(ClaimManager claimManager, DomainTierManager domainTierManager) {
         this.claimManager = claimManager;
         this.domainTierManager = domainTierManager;
     }
@@ -77,7 +74,8 @@ public class DomainManager {
             uuid = UUID.randomUUID();
         }
 
-        Domain domain = new Domain(uuid);
+        DomainTier domainTier = domainTierManager.getLowestDomainTier();
+        Domain domain = new Domain(uuid, domainTier);
         Claim claim = claimManager.createClaim(domain, chunk);
         domain.addClaim(claim);
         this.registerDomain(uuid, domain);
@@ -92,6 +90,10 @@ public class DomainManager {
 
         UUID uuid = domain.getUUID();
         this.registeredDomains.remove(uuid);
+    }
+
+    public void renameDomain(Domain domain, String name) throws ExtensiveDomainsException {
+        domain.setName(name);
     }
 
     public void claimChunk(Domain domain, Chunk chunk) throws ExtensiveDomainsException {
@@ -127,63 +129,84 @@ public class DomainManager {
         return this.domainHasClaim(domain, claim);
     }
 
+    // todo remove
     public boolean playerHasPermission(Player player, Claim claim, ClaimPermission.ClaimAction claimAction) {
         return claim.getClaimPermission().playerHasPermission(player, claimAction);
     }
 
-    public void upgradeDomain(Domain domain) {
-        System.out.println("Upgrading domain...");
-        DomainTier currentDomainTier = domain.getDomainTier();
-        int currentDomainTierLevel = currentDomainTier.getLevel();
-        DomainTierManager domainTierManager = this.plugin.domainTierManager;
-        DomainTier nextDomainTier = domainTierManager.getNextDomainTier(currentDomainTierLevel);
+    public void addCitizen(Domain domain, Citizen citizen) {
+        if (citizen == null) {
+            return;
+        }
+
+        // todo check if citizen is already a member in the domain
+        domain.addCitizen(citizen);
+    }
+
+    public void upgradeDomain(Domain domain) throws ExtensiveDomainsException {
+        DomainTier domainTier = domain.getDomainTier();
+        DomainTier highestDomainTier = domainTierManager.getHighestDomainTier();
+        boolean isHighestDomainTier = domainTier.getLevel() == highestDomainTier.getLevel();
+
+        if (isHighestDomainTier) {
+            throw new ExtensiveDomainsException("Domain is already at the highest tier!");
+        }
+
+        int domainTierLevel = domainTier.getLevel();
+        int nextDomainTierLevel = domainTierLevel + 1;
+        DomainTier nextDomainTier = domainTierManager.getRegisteredDomainTier(nextDomainTierLevel);
 
         if (nextDomainTier == null) {
-            System.out.println("\tDomain is already at the highest tier!");
-            return;
+            throw new ExtensiveDomainsException("An internal exception occurred!");
+            // todo display error message in console "Domain tier with level " + nextDomainTierLevel + " not found!"
         }
 
-        boolean domainCanUpgrade = domainCanUpgradeTier(domain, nextDomainTier.getLevel());
+        boolean domainCanUpgrade = this.domainCanUpgradeTier(domain, nextDomainTier);
 
         if (!domainCanUpgrade) {
-            System.out.println("\tDomain doesn't meet the upgrade requirements!");
-            return;
+            throw new ExtensiveDomainsException("Domain doesn't meet all required conditions to upgrade!");
         }
-
-        System.out.println("\tUpgraded domain from level " + currentDomainTier.getLevel() + " to level " + nextDomainTier.getLevel() + ". The Domain is now a " + nextDomainTier.getName());
 
         domain.setDomainTier(nextDomainTier);
     }
 
-    public boolean domainCanUpgradeTier(Domain domain, int domainTierLevel) {
-        int populationRequiredToUpgrade = 0; //todo finish
-        int domainPopulation = domain.getPopulation();
+    public boolean domainCanUpgradeTier(Domain domain, DomainTier domainTier) {
+        List<DomainCondition> conditions = domainTier.getConditions();
 
-        return domainPopulation >= populationRequiredToUpgrade;
-    }
-
-    public void downgradeDomain(Domain domain) {
-        System.out.println("Downgrading domain...");
-        DomainTier currentDomainTier = domain.getDomainTier();
-        int currentDomainTierLevel = currentDomainTier.getLevel();
-        DomainTierManager domainTierManager = this.plugin.domainTierManager;
-        DomainTier previousDomainTier = domainTierManager.getPreviousDomainTier(currentDomainTierLevel);
-
-        if (previousDomainTier == null) {
-            System.out.println("\tDomain is already at the lowest tier!");
-            return;
+        for (DomainCondition condition : conditions) {
+            if (!condition.test(domain)) {
+                return false;
+            }
         }
 
-        System.out.println("\tDowngraded domain from level " + currentDomainTier.getLevel() + " to level " + previousDomainTier.getLevel() + ". The Domain is now a " + previousDomainTier.getName());
+        return true;
+    }
+
+    public void downgradeDomain(Domain domain) throws ExtensiveDomainsException {
+        DomainTier domainTier = domain.getDomainTier();
+        DomainTier lowestDomainTier = domainTierManager.getLowestDomainTier();
+        boolean isLowestDomainTier = domainTier.getLevel() == lowestDomainTier.getLevel();
+
+        if (isLowestDomainTier) {
+            throw new ExtensiveDomainsException("Domain is already at the lowest tier!");
+        }
+
+        int domainTierLevel = domainTier.getLevel();
+        int previousDomainTierLevel = domainTierLevel - 1;
+        DomainTier previousDomainTier = domainTierManager.getRegisteredDomainTier(previousDomainTierLevel);
+
+        if (previousDomainTier == null) {
+            throw new ExtensiveDomainsException("An internal exception occurred!");
+            // todo display error message in console "Domain tier with level " + previousDomainTierLevel + " not found!"
+        }
 
         domain.setDomainTier(previousDomainTier);
     }
 
-    public boolean domainCanPerformAction(Domain domain, DomainAction action) {
-        DomainTierManager domainTierManager = this.plugin.domainTierManager;
-        int domainTier = domain.getDomainTier().getLevel();
-        boolean domainCanPerformAction = domainTierManager.domainTierAllowsAction(domainTier, action);
+    public boolean domainCanPerformAction(Domain domain, Class<? extends DomainAction> actionClass) {
+        DomainTier domainTier = domain.getDomainTier();
+        List<Class<? extends DomainAction>> domainTierAllowedActions = domainTier.getAllowedActions();
 
-        return domainCanPerformAction;
+        return domainTierAllowedActions.contains(actionClass);
     }
 }

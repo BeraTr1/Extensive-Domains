@@ -1,11 +1,12 @@
-package org.saulo.extensivedomains.listeners;
+package com.extensivedomains.listeners;
 
+import com.extensivedomains.managers.CitizenManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.saulo.extensivedomains.managers.CitizenManager;
-import org.saulo.extensivedomains.objects.Citizen;
+import com.extensivedomains.managers.CitizenManager;
+import com.extensivedomains.objects.citizen.Citizen;
 
 import java.util.UUID;
 

@@ -22,14 +22,9 @@ public class Domain {
     private int population = 0;
     private DomainTier domainTier;
 
-    // todo refactor, inject domain tier level instead
-    public Domain(UUID uuid) {
+    public Domain(UUID uuid, DomainTier domainTier) {
         this.uuid = uuid;
-
-        DomainTierManager domainTierManager = ExtensiveDomains.instance.domainTierManager;
-        final int startingDomainTierLevel = 1;
-        DomainTier domainTier = domainTierManager.getDomainTierFromLevel(startingDomainTierLevel);
-        this.setDomainTier(domainTier);
+        this.domainTier = domainTier;
     }
 
     public void addClaim(Claim claim) {

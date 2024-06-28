@@ -1,9 +1,11 @@
 package com.extensivedomains.commands;
 
 import com.extensivedomains.*;
+import com.extensivedomains.exceptions.ExtensiveDomainsException;
 import com.extensivedomains.managers.CitizenManager;
 import com.extensivedomains.managers.ClaimManager;
 import com.extensivedomains.managers.DomainManager;
+import com.extensivedomains.objects.domain.actions.RenameDomain;
 import com.extensivedomains.playerconditions.HasNameCondition;
 import com.extensivedomains.playerconditions.HasTitleCondition;
 import org.bukkit.Chunk;
@@ -12,15 +14,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import com.extensivedomains.objects.domain.actions.DomainAction;
-import com.extensivedomains.managers.CitizenManager;
-import com.extensivedomains.managers.ClaimManager;
 import com.extensivedomains.objects.citizen.Citizen;
 import com.extensivedomains.objects.claim.Claim;
 import com.extensivedomains.objects.claim.ClaimPermission;
 import com.extensivedomains.objects.claim.ClaimProtection;
 import com.extensivedomains.objects.domain.Domain;
-import com.extensivedomains.managers.DomainManager;
 
 import java.util.List;
 import java.util.UUID;
@@ -51,6 +49,9 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         switch (args[0].toLowerCase()) {
             case "create":
                 this.createDomain(player);
+                break;
+            case "delete":
+                this.deleteDomain(player);
                 break;
             case "claim":
                 this.claimChunk(player);
@@ -88,11 +89,43 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
             case "setpopulation":
                 this.setPopulation(player, args[1]);
                 break;
+            case "rename":
+                this.renameDomain(player, args[1]);
+                break;
+            default:
+                this.unrecognizedCommand(player, args[0]);
+                break;
         }
+    }
+
+    private void unrecognizedCommand(Player player, String commandName) {
+        player.sendMessage("Unrecognized command '" + commandName + "'");
     }
 
     private Citizen getCitizenFromUUID(UUID uuid) {
         return citizenManager.getRegisteredCitizen(uuid);
+    }
+
+    private void renameDomain(Player player, String name) {
+        UUID playerUUID = player.getUniqueId();
+        Citizen citizen = getCitizenFromUUID(playerUUID);
+        Domain domain = citizen.getDomain();
+
+        if (!ExtensiveDomains.instance.domainManager.domainCanPerformAction(domain, RenameDomain.class)) {
+            player.sendMessage("Domain cannot be renamed!");
+            return;
+        }
+
+        try {
+            ExtensiveDomains.instance.domainManager.renameDomain(domain, name);
+            player.sendMessage("Renamed domain to '" + name + "'!");
+        } catch (ExtensiveDomainsException e) {
+            player.sendMessage("There was an error while trying to rename the domain: " + e.getMessage());
+        }
+    }
+
+    private void deleteDomain(Player player) {
+
     }
 
     private void setPopulation(Player player, String populationString) {
@@ -106,14 +139,19 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
     }
 
     private void upgradeDomain(Player player) {
+        System.out.println("Upgrading domain...");
         UUID playerUUID = player.getUniqueId();
         Citizen citizen = getCitizenFromUUID(playerUUID);
         Domain domain = citizen.getDomain();
 
         DomainManager domainManager = ExtensiveDomains.instance.domainManager;
-        domainManager.upgradeDomain(domain);
 
-        player.sendMessage("Upgraded domain to level " + domain.getDomainTier().getLevel() + "!");
+        try {
+            domainManager.upgradeDomain(domain);
+            player.sendMessage("Upgraded domain to level " + domain.getDomainTier().getLevel() + "!");
+        } catch (ExtensiveDomainsException e) {
+            player.sendMessage("There was an error while trying to upgrade this domain: " + e.getMessage());
+        }
     }
 
     private void downgradeDomain(Player player) {
@@ -122,21 +160,27 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         Domain domain = citizen.getDomain();
 
         DomainManager domainManager = ExtensiveDomains.instance.domainManager;
-        domainManager.downgradeDomain(domain);
 
-        player.sendMessage("Downgraded domain to level " + domain.getDomainTier().getLevel() + "!");
+        try {
+            domainManager.downgradeDomain(domain);
+            player.sendMessage("Downgraded domain to level " + domain.getDomainTier().getLevel() + "!");
+        } catch (ExtensiveDomainsException e) {
+            player.sendMessage("There was an error while trying to downgrade this domain: " + e.getMessage());
+        }
     }
 
     private void createDomain(Player player) {
         try {
+            Citizen citizen = getCitizenFromUUID(player.getUniqueId());
             Chunk chunk = Utils.getChunkAtPlayerLocation(player);
             DomainManager domainManager = ExtensiveDomains.instance.domainManager;
-            domainManager.createDomain(chunk);
+            Domain domain = domainManager.createDomain(chunk);
+            domainManager.addCitizen(domain, citizen);
+            citizen.setDomain(domain);
+            player.sendMessage("Created a domain!");
         } catch (Exception e) {
             player.sendMessage(e.getMessage());
         }
-
-        player.sendMessage("Created a domain");
     }
 
     private void claimChunk(Player player) {
@@ -148,12 +192,10 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         try {
             DomainManager domainManager = ExtensiveDomains.instance.domainManager;
             domainManager.claimChunk(domain, chunk);
+            player.sendMessage("Claimed chunk at your location");
         } catch (Exception e) {
             player.sendMessage(e.getMessage());
-            return;
         }
-
-        player.sendMessage("Claimed chunk at your location");
     }
 
     private void unclaimChunk(Player player) {
@@ -165,12 +207,10 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         try {
             DomainManager domainManager = ExtensiveDomains.instance.domainManager;
             domainManager.unclaimChunk(domain, chunk);
+            player.sendMessage("Unclaimed chunk at your location");
         } catch (Exception e) {
             player.sendMessage(e.getMessage());
-            return;
         }
-
-        player.sendMessage("Unclaimed chunk at your location");
     }
 
     @Deprecated
@@ -195,6 +235,7 @@ public class ExtensiveDomainsCommand implements CommandExecutor {
         player.sendMessage("Name: " + domain.getName());
         player.sendMessage("Population: " + domain.getPopulation());
         player.sendMessage("Influence: " + domain.getInfluence());
+        player.sendMessage("Tier Level: " + domain.getDomainTier().getLevel());
         player.sendMessage("");
         player.sendMessage("-- Citizen --");
 //        player.sendMessage("Player: " + citizen.getPlayer().getName());

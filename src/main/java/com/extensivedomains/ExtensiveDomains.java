@@ -1,6 +1,10 @@
 package com.extensivedomains;
 
+import com.extensivedomains.conditions.domainconditions.PopulationCondition;
+import com.extensivedomains.exceptions.ExtensiveDomainsException;
+import com.extensivedomains.objects.domain.actions.RenameDomain;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.extensivedomains.commands.ExtensiveDomainsCommand;
@@ -12,6 +16,8 @@ import com.extensivedomains.listeners.PlayerListener;
 import com.extensivedomains.managers.*;
 import com.extensivedomains.tasks.DetectDayChangeTask;
 
+import java.io.File;
+
 public class ExtensiveDomains extends JavaPlugin {
     public static ExtensiveDomains instance;
 
@@ -22,6 +28,8 @@ public class ExtensiveDomains extends JavaPlugin {
     public DailyTaskManager dailyTaskManager;
     public CitizenManager citizenManager;
     public ClaimManager claimManager;
+    public ConditionManager conditionManager;
+    public DomainActionManager domainActionManager;
 
     @Override
     public void onEnable() {
@@ -30,6 +38,9 @@ public class ExtensiveDomains extends JavaPlugin {
         loadManagers();
         registerCommands();
         registerEventListeners();
+        loadConditions();
+        loadDomainActions();
+        loadDomainTiers();
         loadData();
 
         Runnable runnable = new DetectDayChangeTask();
@@ -39,6 +50,14 @@ public class ExtensiveDomains extends JavaPlugin {
     @Override
     public void onDisable() {
         saveData();
+    }
+
+    public void loadData() {
+        this.dataManager.loadData();
+    }
+
+    public void saveData() {
+        this.dataManager.saveData();
     }
 
     private void registerEventListeners() {
@@ -55,22 +74,45 @@ public class ExtensiveDomains extends JavaPlugin {
 
     private void loadManagers() {
         this.configManager = new ConfigManager(this);
-        this.domainTierManager = new DomainTierManager(this);
+        this.conditionManager = new ConditionManager();
+        this.domainActionManager = new DomainActionManager();
+
+        this.domainTierManager = new DomainTierManager(configManager, domainActionManager, conditionManager);
         this.citizenManager = new CitizenManager();
         this.claimManager = new ClaimManager();
-        this.domainManager = new DomainManager(this, claimManager, domainTierManager);
+        this.domainManager = new DomainManager(claimManager, domainTierManager);
+
         // todo remove below, pass it into "dataManager.loadData()" instead
         String databaseLocation = "database.db";
-        Data data = new SQLite(this, databaseLocation, citizenManager, domainManager);
+        Data data = new SQLite(this, databaseLocation, citizenManager, domainManager, domainTierManager);
         this.dataManager = new DataManager(this, data);
         this.dailyTaskManager = new DailyTaskManager(this);
     }
 
-    public void loadData() {
-        this.dataManager.loadData();
+    private void loadConditions() {
+        try {
+            conditionManager.registerCondition("population", PopulationCondition.class);
+        } catch (ExtensiveDomainsException e) {
+            // todo add console message
+            return;
+        }
     }
 
-    public void saveData() {
-        this.dataManager.saveData();
+    private void loadDomainActions() {
+        try {
+            domainActionManager.registerDomainAction("rename-domain", RenameDomain.class);
+        } catch (ExtensiveDomainsException e) {
+            // todo add console message
+            return;
+        }
+    }
+
+    private void loadDomainTiers() {
+        final String DOMAIN_TIER_CONFIG_FILE_NAME = "domain-tiers.yml";
+        File file = new File(this.getDataFolder().getAbsolutePath() + File.separator + DOMAIN_TIER_CONFIG_FILE_NAME);
+        YamlConfiguration config = configManager.loadConfig(file);
+        domainTierManager.loadDomainTiersFromConfig(config);
+        domainTierManager.resolveAllowedActionsInheritance();
+        System.out.println("Successfully loaded (" + domainTierManager.getRegisteredDomains().size() + ") domain tiers!");
     }
 }

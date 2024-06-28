@@ -27,7 +27,7 @@ public class BlockListener implements Listener {
 
     @EventHandler
     public void onBlockFromToEvent(BlockFromToEvent event) {
-        System.out.println("Block moving from one location to another (liquid block)");
+//        System.out.println("Block moving from one location to another (liquid block)");
 
         Block sourceBlock = event.getBlock();
         Location sourceLocation = sourceBlock.getLocation();
@@ -48,14 +48,14 @@ public class BlockListener implements Listener {
         String sourceLoc = sourceLocation.getBlockX() + " | " + sourceLocation.getBlockY() + " | " + sourceLocation.getBlockZ();
         String toLoc = toLocation.getBlockX() + " | " + toLocation.getBlockY() + " | " + toLocation.getBlockZ();
 
-        System.out.println("Block at (" + sourceLoc + ") is moving to (" + toLoc + ")");
-        System.out.println("\tSource block chunk is claimed: " + sourceChunkIsClaimed);
-        System.out.println("\tTarget block chunk is claimed: " + sourceChunkIsClaimed);
-        if (sourceChunkIsClaimed && toChunkIsClaimed) {
-            System.out.println("\t\tBoth chunks belong to same domain: " + bothClaimsBelongToSameDomain);
-        }
-        System.out.println("\t\tTarget chunk has protection against liquid flow: " + targetClaimHasProtectionAgainstLiquidFlow);
-        System.out.println("\tEvent is being cancelled: " + preventLiquidFlow);
+//        System.out.println("Block at (" + sourceLoc + ") is moving to (" + toLoc + ")");
+//        System.out.println("\tSource block chunk is claimed: " + sourceChunkIsClaimed);
+//        System.out.println("\tTarget block chunk is claimed: " + sourceChunkIsClaimed);
+//        if (sourceChunkIsClaimed && toChunkIsClaimed) {
+//            System.out.println("\t\tBoth chunks belong to same domain: " + bothClaimsBelongToSameDomain);
+//        }
+//        System.out.println("\t\tTarget chunk has protection against liquid flow: " + targetClaimHasProtectionAgainstLiquidFlow);
+//        System.out.println("\tEvent is being cancelled: " + preventLiquidFlow);
 
         if (!preventLiquidFlow) return;
 
